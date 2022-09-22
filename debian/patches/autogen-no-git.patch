@@ -1,0 +1,37 @@
+Description: Only copy submodules if building from a git branch
+ `autogen.sh` fails if building from a standard source tarball.  Firstly, git
+ expects to be called in a git repository, then `copy_submodule_files`
+ blindly attempts to copy files.
+Author: Hugh McMaster <hugh.mcmaster@outlook.com>
+Forwarded: https://gitlab.freedesktop.org/freetype/freetype/-/merge_requests/86
+Applied-Upstream: commit:467e49e817336bf3b890cb0e7fe984a5cae2e5e7
+Last-Update: 2021-10-05
+
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -179,15 +179,17 @@
+   cp $DLG_SRC_DIR/* src/dlg
+ }
+ 
+-DLG_INC_DIR=subprojects/dlg/include/dlg
+-DLG_SRC_DIR=subprojects/dlg/src/dlg
++if test -d ".git"; then
++  DLG_INC_DIR=subprojects/dlg/include/dlg
++  DLG_SRC_DIR=subprojects/dlg/src/dlg
+ 
+-if ! test -d "$DLG_INC_DIR"; then
+-  echo "Checking out submodule in \`subprojects/dlg':"
+-  git submodule init
+-  git submodule update
+-fi
++  if ! test -d "$DLG_INC_DIR"; then
++    echo "Checking out submodule in \`subprojects/dlg':"
++    git submodule init
++    git submodule update
++  fi
+ 
+-copy_submodule_files
++  copy_submodule_files
++fi
+ 
+ # EOF

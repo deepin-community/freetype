@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality TrueType renderer.  */
 /*                                                                          */
-/*  Copyright (C) 2005-2021 by                                              */
+/*  Copyright (C) 2005-2023 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*                                                                          */
@@ -15,14 +15,12 @@
 
 
 #include <ft2build.h>
-#include FT_FREETYPE_H
+#include <freetype/freetype.h>
 
-#include FT_CACHE_H
-#include FT_CACHE_MANAGER_H
-
-#include FT_GLYPH_H
-#include FT_STROKER_H
-#include FT_BITMAP_H
+#include <freetype/ftbitmap.h>
+#include <freetype/ftcache.h>
+#include <freetype/ftglyph.h>
+#include <freetype/ftstroke.h>
 
 #include <stdlib.h>
 #include <stdarg.h>
@@ -47,6 +45,10 @@
 #define LOG( x )  /* */
 
 #endif
+
+
+  const FT_String*
+  FTDemo_Error_String( FT_Error  err );
 
 
   /*************************************************************************/
@@ -88,7 +90,8 @@
 
   FTDemo_Display*
   FTDemo_Display_New( const char*  device,
-                      const char*  dims );
+                      const char*  dims,
+                      const char*  title );
 
 
   void
@@ -215,6 +218,7 @@
     int             use_sbits;         /* do we use embedded bitmaps?     */
     int             use_color;         /* do we use coloured glyphs?      */
     int             use_layers;        /* do we use color-layered glyphs? */
+    int             use_svg;           /* do we use SVG glyphs?           */
     int             autohint;          /* force auto-hinting              */
     int             lcd_mode;          /* mono, aa, light, vrgb, ...      */
     int             preload;           /* force font file preloading      */

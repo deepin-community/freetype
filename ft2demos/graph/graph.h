@@ -4,7 +4,7 @@
  *
  *    Graphics Subsystem interface
  *
- *  Copyright (C) 1999-2021 by
+ *  Copyright (C) 1999-2023 by
  *     - The FreeType Development Team - www.freetype.org
  *
  ***************************************************************************/
@@ -162,7 +162,8 @@
   *    grNewBitmap
   *
   * <Description>
-  *    creates a new bitmap or resizes an existing one
+  *    Creates a new bitmap or resizes an existing one.  The allocated
+  *    pixel buffer is not initialized.
   *
   * <Input>
   *    pixel_mode   :: the target surface's pixel_mode
@@ -177,8 +178,8 @@
   *    Error code. 0 means success.
   *
   * <Note>
-  *    This function really allocates a pixel buffer, zero it, then
-  *    returns a descriptor for it.
+  *    This function really allocates a pixel buffer, then returns
+  *    a descriptor for it.
   *
   *    An existing bitmap will be resized.
   *
@@ -191,47 +192,6 @@
                             int          width,
                             int          height,
                             grBitmap    *bit );
-
-
- /**********************************************************************
-  *
-  * <Function>
-  *    grBlitGlyphToBitmap
-  *
-  * <Description>
-  *    writes a given glyph bitmap to a target surface.
-  *
-  * <Input>
-  *    target  :: handle to target bitmap that belongs to surface
-  *    glyph   :: handle to source glyph bitmap
-  *    x       :: position of left-most pixel of glyph image in target surface
-  *    y       :: position of top-most pixel of glyph image in target surface
-  *    color   :: color to be used to draw a monochrome glyph
-  *
-  * <Return>
-  *   Error code. 0 means success
-  *
-  * <Note>
-  *   There are only two supported source pixel modes : monochrome
-  *   and gray. The 8-bit images can have any number of grays between
-  *   2 and 128, and conversions to the target surface is handled
-  *   _automatically_.
-  *
-  *   Note however that you should avoid blitting a gray glyph to a gray
-  *   bitmap with fewer levels of grays, as this would much probably
-  *   give unpleasant results..
-  *
-  *   This function performs clipping.  This function does not implement
-  *   gamma correction.
-  *
-  **********************************************************************/
-
-  extern int
-  grBlitGlyphToBitmap( grBitmap*  target,
-                       grBitmap*  glyph,
-                       grPos      x,
-                       grPos      y,
-                       grColor    color );
 
 
  /**********************************************************************
@@ -594,7 +554,7 @@
   *   LCD arrangements.
   *
   *   This function performs clipping.  It also handles mono and BGRA
-  *   bitmaps without ganna correction.
+  *   bitmaps without gamma correction.
   *
   **********************************************************************/
 
@@ -745,13 +705,14 @@
   *    blit glyphs
   *
   * <Input>
-  *    target     :: handle to target bitmap/surface
+  *    surface    :: handle to target surface
   *    gamma      :: gamma value. <= 0 to select sRGB transfer function
   *
   **********************************************************************/
 
   extern
-  void  grSetTargetGamma( grBitmap*  target, double  gamma_value );
+  void  grSetTargetGamma( grSurface*  surface,
+                          double      gamma_value );
 
 
  /**********************************************************************
@@ -763,17 +724,17 @@
   *    set the pen position and brush color as required for direct mode.
   *
   * <Input>
-  *    target     :: handle to target bitmap/surface
+  *    surface    :: handle to target surface
   *    x, y       :: pen position
   *    color      :: color as defined by grFindColor
   *
   **********************************************************************/
 
   extern
-  void  grSetTargetPenBrush( grBitmap*  target,
-                             int        x,
-                             int        y,
-                             grColor    color );
+  void  grSetTargetPenBrush( grSurface*  surface,
+                             int         x,
+                             int         y,
+                             grColor     color );
 
 /* */
 

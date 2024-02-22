@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality TrueType renderer.  */
 /*                                                                          */
-/*  Copyright (C) 2019-2021 by                                              */
+/*  Copyright (C) 2019-2023 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*                                                                          */
@@ -26,13 +26,13 @@
     int        width  = bit->width;
     int        height = bit->rows;
     int        color_type;
-
-    int   code = 1;
-    FILE *fp   = NULL;
+    FILE*      fp     = NULL;
 
     png_structp  png_ptr  = NULL;
     png_infop    info_ptr = NULL;
     png_bytep    row      = NULL;
+
+    volatile int  code = 1;
 
 
     /* Set color_type */
@@ -84,7 +84,8 @@
     png_init_io( png_ptr, fp );
 
     /* Write header (8 bit colour depth) */
-    png_set_IHDR( png_ptr, info_ptr, width, height,
+    png_set_IHDR( png_ptr, info_ptr,
+                  (png_uint_32)width, (png_uint_32)height,
                   8, color_type, PNG_INTERLACE_NONE,
                   PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE );
 
@@ -303,9 +304,9 @@
                            { 0x9a,0x73,0x00,0x00,0xf8,0x1e,0xf3,0x2e } };
 
     ULONG         gg[2] =    { display->gamma * 0x10000, 0x10000 };
-    PropertyItem  gamma =    { PropertyTagGamma, 2 * sizeof(ULONG),
+    PropertyItem  gamma =    { PropertyTagGamma, 2 * sizeof ( ULONG ),
                                PropertyTagTypeRational, gg };
-    PropertyItem  software = { PropertyTagSoftwareUsed, strlen(ver_str) + 1,
+    PropertyItem  software = { PropertyTagSoftwareUsed, strlen( ver_str ) + 1,
                                PropertyTagTypeASCII, ver_str };
 
 

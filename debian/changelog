@@ -1,3 +1,183 @@
+freetype (2.13.2+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 2.13.2:
+    + Better support for CFF2 variation fonts.
+    + TrueType interpreter version 38 has been removed.
+  * debian/patches: Drop ftlint.patch and ftmulti.patch (applied upstream).
+
+ -- Hugh McMaster <hmc@debian.org>  Mon, 28 Aug 2023 21:12:08 +1000
+
+freetype (2.13.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 2.13.1:
+    + TrueType interpreter version 38 has been deactivated.
+    + Updates to the 'ftbench', 'ftview' and 'ftmulti' demo programs.
+  * debian/control: Drop transitional package libfreetype6-dev
+    (Closes: #1038235).
+  * debian/copyright: Update for FreeType 2.13.1.
+  * debian/patches:
+    + Refresh ftoption.patch.
+    + ftlint.patch: Instruct man(1) to run the `tbl` preprocessor.
+    + ftmulti.patch: Fix spelling and comments in src/ftmulti.c.
+  * libfreetype6: Update symbols file.
+  * debian/rules: Exclude sitemap.xml.gz during dh_installdocs-indep.
+
+ -- Hugh McMaster <hmc@debian.org>  Thu, 17 Aug 2023 21:53:14 +1000
+
+freetype (2.13.0+dfsg-1) unstable; urgency=medium
+
+  * New upstream version 2.13.0:
+    + The 'COLR' v1 API is now considered stable.
+    + TrueType interpreter version 38  (also known as 'Infinality') has been
+      deprecated and will be removed in the next upstream version.
+    + TrueType interpreter version 40 remains the default.
+    + Various updates to the demo programs.
+  * debian/control:
+    + Update Maintainer email address.
+    + {Build-}Depend on libbz2-dev.
+  * debian/copyright: Update for FreeType 2.13.0 and 2023.
+  * debian/patches:
+    + Drop CVE-*, fix-wild-free-svg and hardening patches.
+    + Refresh hide-donations-information.patch.
+    + Rename enable-subpixel-rendering.patch to ftoption.patch.
+    + Enable long PCF font family names in ftoption.h.
+  * debian/rules: Update configure flags for main and udeb builds.
+  * freetype2-doc: Update Lintian overrides.
+  * libfreetype6: Update symbols file.
+
+ -- Hugh McMaster <hmc@debian.org>  Thu, 13 Jul 2023 21:39:06 +1000
+
+freetype (2.12.1+dfsg-5) unstable; urgency=medium
+
+  * debian/patches: Add a patch to fix CVE-2023-2004 (Closes: #1034612).
+    - Integer overflow in tt_hvadvance_adjust().
+
+ -- Hugh McMaster <hugh.mcmaster@outlook.com>  Thu, 20 Apr 2023 21:08:03 +1000
+
+freetype (2.12.1+dfsg-4) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Update Lintian override info format in freetype2-demos.lintian-overrides.
+  * Re-export upstream signing key without extra signatures.
+  * Raise Standards-Version to 4.6.2 (no changes needed).
+
+  [ Hugh McMaster ]
+  * debian/control: Update Homepage URL.
+  * debian/control, debian/rules:
+    + Add the 'pkg.freetype.nodemos' build profile (Closes: #1011049).
+    + Support the 'noudeb' build profile (Closes: #1024949).
+    + Drop support for the deprecated 'stage1' build profile.
+  * debian/copyright:
+    + Update Source URL.
+    + Update 'debian' copyright block for 2023.
+  * debian/rules: Remove un-needed dh_install exclusion from the override.
+  * debian/upstream/metadata: Add upstream repositories and update values.
+  * freetype2-demos: Update typo-in-manual-page Lintian override.
+  * lintian-overrides: Drop source-contains-prebuilt-javascript-object.
+  * freetype2-demos: Install binaries and man pages via upstream Makefile.
+
+ -- Hugh McMaster <hugh.mcmaster@outlook.com>  Thu, 12 Jan 2023 23:05:22 +1100
+
+freetype (2.12.1+dfsg-3) unstable; urgency=medium
+
+  * debian/control: Raise Standards-Version to 4.6.1 (no changes needed).
+  * debian/patches:
+    - ftbench: Exit if the number of glyphs is zero (CVE-2022-31782).
+    - Fix a wild free in certain OT-SVG fonts (Closes: #1013094).
+      Thanks to Ben Wagner for providing a patch.
+    - Harden the demos by appending CPPFLAGS to CFLAGS.
+
+ -- Hugh McMaster <hugh.mcmaster@outlook.com>  Sun, 19 Jun 2022 21:55:46 +1000
+
+freetype (2.12.1+dfsg-2) unstable; urgency=medium
+
+  * Revert "debian/control: Build-Depend on librsvg2-dev".
+    - Avoid breaking cross-architecture bootstrap.
+    - Prevent a circular build-dependency.
+
+ -- Hugh McMaster <hugh.mcmaster@outlook.com>  Mon, 16 May 2022 21:43:37 +1000
+
+freetype (2.12.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream version: Support for OpenType SVG fonts in the demo programs.
+  * debian/copyright: Update for FreeType 2.12.1.
+  * debian/patches: Drop cff-segfault, integer-overflow, reset-iup-flags,
+    sdf-invisible-glyphs and set-ft-face-flag-color patches.
+  * debian/control: Build-Depend on librsvg2-dev.
+  * debian/rules: Build the udeb package without librsvg.
+  * Update upstream's GPG public signing key.
+
+ -- Hugh McMaster <hugh.mcmaster@outlook.com>  Fri, 13 May 2022 19:46:58 +1000
+
+freetype (2.12.0+dfsg-1) unstable; urgency=medium
+
+  * New upstream version:
+    - Support for OpenType SVG fonts. By default, FreeType will only load
+      the 'SVG' table of an OpenType font. Please note: OT-SVG support will
+      be enabled in Debian when FreeType 2.12.1 is released.
+    - Improved handling of fonts with an 'sbix' table.
+  * Update upstream's GPG signing key.
+  * debian/control: freetype-doc no longer Depends on libjs-jquery.
+  * debian/copyright: Update for FreeType 2.12.0.
+  * debian/patches:
+    - Drop CVE-2022-27404, CVE-2022-27405, CVE-2022-27406 and jquery patches.
+    - Refresh enable-gxvalid-otvalid and hide-donations-information patches.
+    - Cherry-pick upstream patches:
+      + Set FT_FACE_FLAG_COLOR
+      + Properly handle invisible glyphs
+      + Fix rendering of certain glyphs
+      + Prevent an integer overflow
+      + Fix a segfault when size is NULL.
+  * Update a comment in the Lintian source-overrides file.
+
+ -- Hugh McMaster <hugh.mcmaster@outlook.com>  Sun, 08 May 2022 19:03:37 +1000
+
+freetype (2.11.1+dfsg-2) unstable; urgency=high
+
+  * Add upstream patches to fix multiple vulnerabilities. Closes: #1010183.
+    - CVE-2022-27404: heap buffer overflow via invalid integer decrement in
+      sfnt_init_face() and woff2_open_font().
+    - CVE-2022-27405: segmentation violation via ft_open_face_internal() when
+      attempting to read the value of FT_LONG face_index.
+    - CVE-2022-27406: segmentation violation via FT_Request_Size() when
+      attempting to read the value of an unguarded face size handle.
+  * debian/copyright: Update debian/* section for 2022.
+
+ -- Hugh McMaster <hugh.mcmaster@outlook.com>  Tue, 26 Apr 2022 23:16:58 +1000
+
+freetype (2.11.1+dfsg-1) unstable; urgency=medium
+
+  * New upstream version:
+    - Experimental COLR v1 API updated to OpenType standard 1.9.
+    - Some fields in the 'CID_FaceDictRec', 'CID_FaceInfoRec' and 'FT_Data'
+      structures have been changed from signed to unsigned types.
+    - Removal of legacy blitter from graph-based demos.
+  * freetype2-doc:
+    - Remove links file. The tutorial documentation no longer uses jQuery.
+    - Don't install the CMAKE file.
+  * libfreetype6: Update symbols file for FreeType 2.11.1.
+  * Remove all files in debian/missing-sources (no longer needed).
+  * debian/control:
+    - libfreetype-dev now Provides libfreetype6-dev (Closes: #1002049).
+      Thanks to Jochen Sprickerhof for supplying a patch.
+    - No longer Build-Depend on libjs-jquery.
+  * debian/copyright: Update for FreeType 2.11.1.
+  * debian/patches:
+    - Drop autogen-no-git.patch (applied upstream).
+    - Drop ft2demos-no-rpath.patch and fix-js-doc-paths.patch.
+      Neither patch is needed due to upstream changes.
+    - Add a patch to remove remaining jQuery script tags.
+    - use-donation-button.patch: Use a button instead of an image for
+      donations. Thanks to Paul Wise for the patch. (Closes: #998065).
+  * debian/rules:
+    - Update files excluded during the dh_installdocs-indep override.
+    - Trim relative folder paths in the tutorial documentation.
+    - Drop string substitution of the #defined value of SIZEOF_LONG.
+      This is no longer needed due to upstream changes.
+  * debian/upstream/metadata: Update for FreeType 2.11.1.
+
+ -- Hugh McMaster <hugh.mcmaster@outlook.com>  Wed, 29 Dec 2021 10:22:50 +1100
+
 freetype (2.11.0+dfsg-1) unstable; urgency=medium
 
   * New upstream version:

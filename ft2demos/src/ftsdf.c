@@ -1,3 +1,17 @@
+/****************************************************************************/
+/*                                                                          */
+/*  The FreeType project -- a free and portable quality TrueType renderer.  */
+/*                                                                          */
+/*  Copyright (C) 2021-2023 by                                              */
+/*  D. Turner, R.Wilhelm, W. Lemberg, and Anuj Verma                        */
+/*                                                                          */
+/*                                                                          */
+/*  FTSdf - a simple font viewer for FreeType's SDF output.                 */
+/*                                                                          */
+/*  Press ? when running this program to have a list of key-bindings.       */
+/*                                                                          */
+/****************************************************************************/
+
 
 #include <freetype/ftmodapi.h>
 
@@ -31,7 +45,7 @@
     FT_Face  face;
     FT_Int   ptsize;
     FT_Int   glyph_index;
-    FT_Int   scale;
+    FT_UInt  scale;
     FT_Int   spread;
     FT_Int   x_offset;
     FT_Int   y_offset;
@@ -89,8 +103,8 @@
                               &status.overlaps ) );
 
     /* Set pixel size and load the glyph index. */
-    FT_CALL( FT_Set_Pixel_Sizes( status.face, 0, status.ptsize ) );
-    FT_CALL( FT_Load_Glyph( status.face, status.glyph_index,
+    FT_CALL( FT_Set_Pixel_Sizes( status.face, 0, (FT_UInt)status.ptsize ) );
+    FT_CALL( FT_Load_Glyph( status.face, (FT_UInt)status.glyph_index,
                             FT_LOAD_DEFAULT ) );
 
     /* This is just to measure the generation time. */
@@ -110,7 +124,7 @@
     status.generation_time = ( (float)( end - start ) /
                                (float)CLOCKS_PER_SEC ) * 1000.0f;
 
-    printf( "Generation Time: %.0f ms\n", status.generation_time );
+    printf( "Generation Time: %.0f ms\n", (double)status.generation_time );
 
   Exit:
     return err;
@@ -209,7 +223,7 @@
 
 
     sprintf( header_string,
-             "Glyph Index: %d, Pt Size: %d, Spread: %d, Scale: %d",
+             "Glyph Index: %d, Pt Size: %d, Spread: %d, Scale: %u",
              status.glyph_index,
              status.ptsize,
              status.spread,
@@ -226,7 +240,7 @@
 
     sprintf( header_string,
              "SDF Generated in: %.0f ms, From: %s",
-             status.generation_time,
+             (double)status.generation_time,
              status.use_bitmap ? "Bitmap" : "Outline" );
     grWriteCellString( display->bitmap, 0, 2 * HEADER_HEIGHT,
                        header_string, display->fore_color );
@@ -243,8 +257,8 @@
       /* Only print these in reconstruction mode. */
       sprintf( header_string,
                "Width: %.2f, Edge: %.2f",
-               status.width,
-               status.edge );
+               (double)status.width,
+               (double)status.edge );
       grWriteCellString( display->bitmap, 0, 4 * HEADER_HEIGHT,
                          header_string, display->fore_color );
     }
@@ -258,9 +272,10 @@
     grEvent  event;
 
     int  ret   = 0;
-    int  speed = 10 * status.scale;
+    int  speed = 10 * (int)status.scale;
 
 
+    grRefreshSurface( display->surface );
     grListenSurface( display->surface, 0, &event );
 
     switch ( event.key )
@@ -393,7 +408,7 @@
 
 
   /* Clamp value `x` between `lower_limit` and `upper_limit`. */
-  float
+  static float
   clamp( float  x,
          float  lower_limit,
          float  upper_limit )
@@ -413,7 +428,7 @@
   /* This implementation is taken from Wikipedia.                     */
   /*                                                                  */
   /*   https://en.wikipedia.org/wiki/Smoothstep                       */
-  float
+  static float
   smoothstep( float  edge0,
               float  edge1,
               float  x )
@@ -456,10 +471,10 @@
     center.y = display->bitmap->rows  / 2;
 
     /* compute draw region around `center` */
-    draw_region.xMin = center.x - ( bitmap->width * status.scale) / 2;
-    draw_region.xMax = center.x + ( bitmap->width * status.scale) / 2;
-    draw_region.yMin = center.y - ( bitmap->rows  * status.scale) / 2;
-    draw_region.yMax = center.y + ( bitmap->rows  * status.scale) / 2;
+    draw_region.xMin = center.x - ( bitmap->width * status.scale ) / 2;
+    draw_region.xMax = center.x + ( bitmap->width * status.scale ) / 2;
+    draw_region.yMin = center.y - ( bitmap->rows  * status.scale ) / 2;
+    draw_region.yMax = center.y + ( bitmap->rows  * status.scale ) / 2;
 
     /* add position offset so that we can move the image */
     draw_region.xMin += status.x_offset;
@@ -509,22 +524,25 @@
 
     /* Finally loop over all pixels inside the draw region        */
     /* and copy pixels from the sample region to the draw region. */
-    for ( FT_Int  j = draw_region.yMax - 1, y = sample_region.yMin;
+    for ( FT_Int  j = draw_region.yMax - 1,
+                  y = sample_region.yMin;
           j >= draw_region.yMin;
           j--, y++ )
     {
-      for ( FT_Int  i = draw_region.xMin, x = sample_region.xMin;
+      for ( FT_Int  i = draw_region.xMin,
+                    x = sample_region.xMin;
             i < draw_region.xMax;
             i++, x++ )
       {
-        FT_UInt  display_index = j * display->bitmap->width + i;
-        float    min_dist;
+        FT_Int  display_index = j * display->bitmap->width + i;
+        float   min_dist;
 
 
         if ( status.nearest_filtering )
         {
-          FT_UInt  bitmap_index = ( y / status.scale ) * bitmap->width +
-                                    x / status.scale;
+          FT_Int   bitmap_index =
+                     ( y / (FT_Int)status.scale ) * (FT_Int)bitmap->width +
+                     x / (FT_Int)status.scale;
           FT_Byte  pixel_value  = buffer[bitmap_index];
 
 
@@ -643,7 +661,7 @@
 
 
   static void
-  usage( char*  exec_name )
+  usage( const char*  exec_name )
   {
     fprintf( stderr,
       "\n"
@@ -667,13 +685,11 @@
   main( int     argc,
         char**  argv )
   {
-    FT_Error  err       = FT_Err_Ok;
-    char*     exec_name = NULL;
+    FT_Error     err       = FT_Err_Ok;
+    const char*  exec_name = ft_basename( argv[0] );
 
     int  flip_y = 1;
 
-
-    exec_name = ft_basename( argv[0] );
 
     if ( argc != 3 )
       usage( exec_name );
@@ -687,7 +703,8 @@
       goto Exit;
     }
 
-    display = FTDemo_Display_New( NULL, "800x600x24" );
+    display = FTDemo_Display_New( NULL, "800x600x24",
+                                  "Signed Distance Field Viewer" );
     if ( !display )
     {
       printf( "Failed to create FTDemo_Display\n" );
@@ -697,7 +714,6 @@
     FT_CALL( FT_Property_Set( handle->library, "sdf", "flip_y", &flip_y ) );
     FT_CALL( FT_Property_Set( handle->library, "bsdf", "flip_y", &flip_y ) );
 
-    grSetTitle( display->surface, "Signed Distance Field Viewer" );
     event_color_change();
 
     FT_CALL( FT_New_Face( handle->library, argv[2], 0, &status.face ) );
@@ -709,8 +725,6 @@
 
       draw();
       write_header();
-
-      grRefreshSurface( display->surface );
 
     } while ( !Process_Event() );
 

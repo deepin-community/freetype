@@ -2,7 +2,7 @@
 # Meson project file for FreeType graph library
 #
 
-# Copyright (C) 2021 by
+# Copyright (C) 2021-2023 by
 # David Turner, Robert Wilhelm, and Werner Lemberg.
 #
 # This file is part of the FreeType project, and may only be used, modified,
@@ -20,8 +20,6 @@ graph_sources = files([
   'gblender.c',
   'gblender.h',
   'graph.h',
-  'grblit.c',
-  'grblit.h',
   'grconfig.h',
   'grdevice.c',
   'grdevice.h',
@@ -53,10 +51,7 @@ if host_machine.system() == 'windows'
   graph_dependencies += [meson.get_compiler('c').find_library('gdiplus')]
 
 elif host_machine.system() == 'darwin'
-  graph_sources += files([
-    'mac/grmac.c',
-    'mac/grmac.h',
-  ])
+  message('Native macOS driver is not implemented - use XQuartz')
   graph_c_args += ['-DDEVICE_MAC']
 endif
 

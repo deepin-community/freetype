@@ -1,7 +1,4 @@
-autogen-no-git.patch
 enable-gxvalid-otvalid.patch
-enable-subpixel-rendering.patch
-ft2demos-no-rpath.patch
-fix-js-doc-paths.patch
+ftoption.patch
 no-web-fonts.patch
 hide-donations-information.patch

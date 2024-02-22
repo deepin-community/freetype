@@ -2,7 +2,7 @@
 # Meson project file for FreeType 2 test programs
 #
 
-# Copyright (C) 2021 by
+# Copyright (C) 2021-2023 by
 # David Turner, Robert Wilhelm, and Werner Lemberg.
 #
 # This file is part of the FreeType project, and may only be used, modified,
@@ -17,7 +17,7 @@
 # possible since the subproject might not be cloned yet, so we have to
 # hard-code the string.
 project('freetype-demos', 'c', 'cpp',
-  version: '2.11.0')
+  version: '2.13.2')
 
 
 # Access to the FreeType 2 source tree is required, since some of the demo
@@ -29,6 +29,11 @@ libfreetype2_dep = libfreetype2.get_variable('freetype_dep')
 
 libpng_dep = dependency('libpng',
   required: true)
+
+librsvg_dep = dependency('librsvg-2.0',
+  version: '>= 2.46.0',
+  required: get_option('librsvg'))
+
 
 cc = meson.get_compiler('c')
 
@@ -65,36 +70,28 @@ output_lib = static_library('output',
   dependencies: libfreetype2_dep
 )
 
+ftcommon_lib_c_args = []
+
+if librsvg_dep.found()
+  ftcommon_lib_c_args += '-DHAVE_LIBRSVG'
+endif
+
 ftcommon_lib = static_library('ftcommon',
   [
     'src/ftcommon.c',
     'src/ftcommon.h',
     'src/ftpngout.c',
+    'src/rsvg-port.c',
+    'src/rsvg-port.h',
   ],
-  dependencies: [libpng_dep, libfreetype2_dep],
+  c_args: ftcommon_lib_c_args,
+  dependencies: [libpng_dep, librsvg_dep, libfreetype2_dep],
   include_directories: graph_include_dir,
   link_with: [common_lib, graph_lib],
 )
 
-executable('fttimer',
-  'src/fttimer.c',
-  dependencies: libfreetype2_dep,
-  install: false)
 
-executable('ftchkwd',
-  'src/ftchkwd.c',
-  dependencies: libfreetype2_dep,
-  install: false)
-
-executable('ftmemchk',
-  'src/ftmemchk.c',
-  dependencies: libfreetype2_dep,
-  install: false)
-
-executable('ftpatchk',
-  'src/ftpatchk.c',
-  dependencies: libfreetype2_dep,
-  install: false)
+# programs
 
 executable('ftbench',
   'src/ftbench.c',
@@ -102,23 +99,22 @@ executable('ftbench',
   link_with: common_lib,
   install: true)
 
-executable('ftdump',
-  'src/ftdump.c',
+executable('ftchkwd',
+  'src/ftchkwd.c',
   dependencies: libfreetype2_dep,
-  link_with: [common_lib, output_lib],
-  install: true)
-
-executable('ftlint',
-  'src/ftlint.c',
-  dependencies: libfreetype2_dep,
-  link_with: common_lib,
-  install: true)
+  install: false)
 
 executable('ftdiff',
   'src/ftdiff.c',
   dependencies: libfreetype2_dep,
   include_directories: graph_include_dir,
   link_with: ftcommon_lib,
+  install: true)
+
+executable('ftdump',
+  'src/ftdump.c',
+  dependencies: libfreetype2_dep,
+  link_with: [common_lib, output_lib],
   install: true)
 
 executable('ftgamma',
@@ -135,12 +131,28 @@ executable('ftgrid',
   link_with: [ftcommon_lib, output_lib],
   install: true)
 
+executable('ftlint',
+  'src/ftlint.c',
+  dependencies: libfreetype2_dep,
+  link_with: common_lib,
+  install: true)
+
+executable('ftmemchk',
+  'src/ftmemchk.c',
+  dependencies: libfreetype2_dep,
+  install: false)
+
 executable('ftmulti',
   'src/ftmulti.c',
   dependencies: libfreetype2_dep,
   include_directories: graph_include_dir,
   link_with: ftcommon_lib,
   install: true)
+
+executable('ftpatchk',
+  'src/ftpatchk.c',
+  dependencies: libfreetype2_dep,
+  install: false)
 
 executable('ftsdf',
   'src/ftsdf.c',
@@ -156,6 +168,17 @@ executable('ftstring',
   link_with: ftcommon_lib,
   install: true)
 
+executable('fttimer',
+  'src/fttimer.c',
+  dependencies: libfreetype2_dep,
+  install: false)
+
+executable('ftvalid',
+  'src/ftvalid.c',
+  dependencies: libfreetype2_dep,
+  link_with: common_lib,
+  install: true)
+
 executable('ftview',
   'src/ftview.c',
   dependencies: libfreetype2_dep,
@@ -163,11 +186,19 @@ executable('ftview',
   link_with: ftcommon_lib,
   install: true)
 
-executable('ftvalid',
-  'src/ftvalid.c',
+# This program only works if FreeType has been compiled with enabled option
+# `TT_CONFIG_OPTION_BYTECODE_INTERPRETER` (which is the default).
+#
+# We need a path into FreeType's `src/truetype` directory.  This is
+# something normal applications should never need.
+executable('ttdebug',
+  'src/ttdebug.c',
   dependencies: libfreetype2_dep,
+  c_args: '-DFT2_BUILD_LIBRARY=1',
+  include_directories: 'subprojects/freetype2/src/truetype',
   link_with: common_lib,
   install: true)
+
 
 install_man([
   'man/ftbench.1',

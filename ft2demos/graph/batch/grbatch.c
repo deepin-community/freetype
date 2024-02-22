@@ -5,7 +5,7 @@
  *  This driver maintains the image in memory without displaying it,
  *  used by the graphics utility of the FreeType test suite.
  *
- *  Copyright (C) 1999-2021 by
+ *  Copyright (C) 1999-2023 by
  *  David Turner, Robert Wilhelm, and Werner Lemberg.
  *
  *  This file is part of the FreeType project, and may only be used
@@ -21,6 +21,7 @@
 /* FT graphics subsystem */
 #include "grobjs.h"
 #include "grdevice.h"
+#include "grbatch.h"
 
 
   static int
@@ -83,8 +84,6 @@
     surface->bitmap     = *bitmap;
     surface->refresh    = 0;
     surface->owner      = 0;
-    surface->saturation = 0;
-    surface->blit_mono  = 0;
 
     surface->refresh_rect = (grRefreshRectFunc)NULL;  /* nothing to refresh */
     surface->set_title    = gr_batch_surface_set_title;

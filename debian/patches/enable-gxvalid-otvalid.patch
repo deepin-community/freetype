@@ -10,7 +10,7 @@ Last-Update: 2021-10-07
 
 --- a/modules.cfg
 +++ b/modules.cfg
-@@ -114,7 +114,7 @@
+@@ -117,7 +117,7 @@
  
  # TrueType GX/AAT table validation.  Needs `ftgxval.c' below.
  #
@@ -19,7 +19,7 @@ Last-Update: 2021-10-07
  
  # Support for streams compressed with gzip (files with suffix .gz).
  #
-@@ -133,7 +133,7 @@
+@@ -136,7 +136,7 @@
  
  # OpenType table validation.  Needs `ftotval.c' below.
  #

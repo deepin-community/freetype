@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality TrueType renderer.  */
 /*                                                                          */
-/*  Copyright (C) 1996-2021 by                                              */
+/*  Copyright (C) 1996-2023 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*                                                                          */
@@ -20,14 +20,14 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include FT_STROKER_H
-#include FT_SYNTHESIS_H
-#include FT_LCD_FILTER_H
-#include FT_DRIVER_H
-#include FT_MULTIPLE_MASTERS_H
-#include FT_SFNT_NAMES_H
-#include FT_TRUETYPE_IDS_H
-#include FT_TRIGONOMETRY_H
+#include <freetype/ftdriver.h>
+#include <freetype/ftlcdfil.h>
+#include <freetype/ftmm.h>
+#include <freetype/ftsnames.h>
+#include <freetype/ftstroke.h>
+#include <freetype/ftsynth.h>
+#include <freetype/fttrigon.h>
+#include <freetype/ttnameid.h>
 
 #define MAXPTSIZE    500                 /* dtp */
 #define MAX_MM_AXES   32
@@ -44,10 +44,10 @@
   struct  AF_GlyphHintsRec_;
   typedef struct AF_GlyphHintsRec_*  AF_GlyphHints;
 
-  extern int            _af_debug_disable_horz_hints;
-  extern int            _af_debug_disable_vert_hints;
-  extern int            _af_debug_disable_blue_hints;
-  extern AF_GlyphHints  _af_debug_hints;
+  extern int            af_debug_disable_horz_hints_;
+  extern int            af_debug_disable_vert_hints_;
+  extern int            af_debug_disable_blue_hints_;
+  extern AF_GlyphHints  af_debug_hints_;
 
 #ifdef __cplusplus
   extern "C" {
@@ -64,11 +64,11 @@
   extern FT_Error
   af_glyph_hints_get_num_segments( AF_GlyphHints  hints,
                                    FT_Int         dimension,
-                                   FT_Int*        num_segments );
+                                   FT_UInt*       num_segments );
   extern FT_Error
   af_glyph_hints_get_segment_offset( AF_GlyphHints  hints,
                                      FT_Int         dimension,
-                                     FT_Int         idx,
+                                     FT_UInt        idx,
                                      FT_Pos        *offset,
                                      FT_Bool       *is_blue,
                                      FT_Pos        *blue_offset );
@@ -82,7 +82,7 @@
 #define BUFSIZE  256
 
 #define DO_BITMAP       1
-#define DO_GRAY_BITMAP  2
+#define DO_GRAY_BITMAP  2  /* needs DO_BITMAP */
 #define DO_OUTLINE      4
 #define DO_DOTS         8
 #define DO_DOTNUMBERS  16
@@ -197,7 +197,7 @@
                       FTDemo_Display*  display )
   {
     st->axis_color    = grFindColor( display->bitmap,   0,   0,   0, 255 ); /* black       */
-    st->grid_color    = grFindColor( display->bitmap, 192, 192, 192, 255 ); /* gray        */
+    st->grid_color    = grFindColor( display->bitmap, 216, 216, 216, 255 ); /* gray        */
     st->outline_color = grFindColor( display->bitmap, 255,   0,   0, 255 ); /* red         */
     st->on_color      = grFindColor( display->bitmap, 255,   0,   0, 255 ); /* red         */
     st->off_color     = grFindColor( display->bitmap,   0, 128,   0, 255 ); /* dark green  */
@@ -213,7 +213,7 @@
     /* colours are adjusted for color-blind people, */
     /* cf. http://jfly.iam.u-tokyo.ac.jp/color      */
     st->axis_color    = grFindColor( display->bitmap,   0,   0,   0, 255 ); /* black          */
-    st->grid_color    = grFindColor( display->bitmap, 192, 192, 192, 255 ); /* gray           */
+    st->grid_color    = grFindColor( display->bitmap, 216, 216, 216, 255 ); /* gray           */
     st->outline_color = grFindColor( display->bitmap, 230, 159,   0, 255 ); /* orange         */
     st->on_color      = grFindColor( display->bitmap, 230, 159,   0, 255 ); /* orange         */
     st->off_color     = grFindColor( display->bitmap,  86, 180, 233, 255 ); /* sky blue       */
@@ -277,8 +277,8 @@
 
     for ( dimension = 1; dimension >= 0; dimension-- )
     {
-      FT_Int  num_seg;
-      FT_Int  count;
+      FT_UInt  num_seg;
+      FT_UInt  count;
 
 
       af_glyph_hints_get_num_segments( hints, dimension, &num_seg );
@@ -399,7 +399,6 @@
                 int         scale )
   {
     unsigned char*  s = bit->buffer;
-    unsigned char*  t;
     unsigned char*  line;
     int             pitch;
     int             width;
@@ -409,12 +408,17 @@
                            : -bit->pitch;
     width = bit->width;
 
-    t = (unsigned char*)malloc( (size_t)( pitch * bit->rows *
-                                          scale * scale ) );
-    if ( !t )
-      return;
+    /* limit bitmap size */
+    if ( pitch * scale <= 0xFFFF && bit->rows * scale <= 0xFFFF )
+      line = (unsigned char*)malloc( (size_t)( pitch * bit->rows *
+                                               scale * scale ) );
+    else
+      line = NULL;
 
-    line = t;
+    bit->buffer = line;  /* the bitmap now owns this buffer */
+
+    if ( !line )
+      return;
 
     switch( bit->mode )
     {
@@ -495,11 +499,26 @@
         }
         break;
 
+      case gr_pixel_mode_bgra:
+        for ( i = 0; i < bit->rows; i++ )
+        {
+          FT_UInt32*  l4 = (FT_UInt32*)line;
+          FT_UInt32*  s4 = (FT_UInt32*)( s + i * pitch );
+
+          for ( j = 0; j < width; j++, s4++ )
+            for ( k = 0; k < scale; k++, l4++ )
+              *l4 = *s4;
+
+          for ( k = 1; k < scale; k++, line += pitch * scale )
+            memcpy( line + pitch * scale, line, (size_t)( pitch * scale ) );
+          line += pitch * scale;
+        }
+        break;
+
       default:
         return;
     }
 
-    bit->buffer = t;
     bit->rows  *= scale;
     bit->width *= scale;
     bit->pitch *= scale;
@@ -527,13 +546,12 @@
     glyph_idx = FTDemo_Get_Index( handle, (FT_UInt32)st->Num );
 
 #ifdef FT_DEBUG_AUTOFIT
-    _af_debug_disable_horz_hints = !st->do_horz_hints;
-    _af_debug_disable_vert_hints = !st->do_vert_hints;
-    _af_debug_disable_blue_hints = !st->do_blue_hints;
+    af_debug_disable_horz_hints_ = !st->do_horz_hints;
+    af_debug_disable_vert_hints_ = !st->do_vert_hints;
+    af_debug_disable_blue_hints_ = !st->do_blue_hints;
 #endif
 
-    if ( FT_Load_Glyph( size->face, glyph_idx,
-                        handle->load_flags | FT_LOAD_NO_BITMAP ) )
+    if ( FT_Load_Glyph( size->face, glyph_idx, handle->load_flags ) )
       return;
 
     slot = size->face->glyph;
@@ -566,15 +584,17 @@
     /* render scaled bitmap */
     if ( st->work & DO_BITMAP && scale == st->scale )
     {
-      FT_Glyph        glyph, glyf;
-      int             left, top, x_advance, y_advance;
-      grBitmap        bitg;
+      FT_Glyph  glyph, glyf;
+      int       left, top, x_advance, y_advance;
+      grBitmap  bitg;
 
 
-      FT_Get_Glyph( slot, &glyph );
-      error  = FTDemo_Glyph_To_Bitmap( handle, glyph, &bitg, &left, &top,
-                                       &x_advance, &y_advance, &glyf);
+      err = FT_Get_Glyph( slot, &glyph );
+      if ( err )
+        return;
 
+      error = FTDemo_Glyph_To_Bitmap( handle, glyph, &bitg, &left, &top,
+                                      &x_advance, &y_advance, &glyf);
       if ( !error )
       {
         bitmap_scale( st, &bitg, scale );
@@ -583,7 +603,7 @@
                               ox + left * scale, oy - top * scale,
                               st->axis_color );
 
-        free( bitg.buffer );
+        grDoneBitmap( &bitg );
 
         if ( glyf )
           FT_Done_Glyph( glyf );
@@ -602,7 +622,7 @@
 #ifdef FT_DEBUG_AUTOFIT
       /* Draw segment before drawing glyph. */
       if ( status.do_segment && handle->load_flags & FT_LOAD_FORCE_AUTOHINT )
-        grid_hint_draw_segment( &status, size, _af_debug_hints );
+        grid_hint_draw_segment( &status, size, af_debug_hints_ );
 #endif
 
       /* scale the outline */
@@ -619,7 +639,10 @@
       /* stroke then draw it */
       if ( st->work & DO_OUTLINE )
       {
-        FT_Get_Glyph( slot, &glyph );
+        err = FT_Get_Glyph( slot, &glyph );
+        if ( err )
+          return;
+
         FT_Glyph_Stroke( &glyph, st->stroker, 1 );
 
         error = FTDemo_Sketch_Glyph_Color( handle, display, glyph,
@@ -835,7 +858,7 @@
     grWriteln( "F1, ?       display this help screen    if autohinting:                     " );
     grWriteln( "                                          H         toggle horiz. hinting   " );
     grWriteln( "i, k        move grid up/down             V         toggle vert. hinting    " );
-    grWriteln( "j, l        move grid left/right          B         toggle blue zone hinting" );
+    grWriteln( "j, l        move grid left/right          Z         toggle blue zone hinting" );
     grWriteln( "PgUp, PgDn  zoom in/out grid              s         toggle segment drawing  " );
     grWriteln( "SPC         reset zoom and position                  (unfitted, with blues) " );
     grWriteln( "                                          1         dump edge hints         " );
@@ -851,19 +874,19 @@
     grWriteln( "                                          H         cycle through hinting   " );
     grWriteln( "Left, Right adjust index by 1                        engines (if available) " );
     grWriteln( "F7, F8      adjust index by 16                                              " );
-    grWriteln( "F9, F10     adjust index by 256         b           toggle bitmap           " );
-    grWriteln( "F11, F12    adjust index by 4096        d           toggle dot display      " );
+    grWriteln( "F9, F10     adjust index by 256         b           toggle embedded bitmap  " );
+    grWriteln( "F11, F12    adjust index by 4096        B           toggle bitmap display   " );
     grWriteln( "                                        o           toggle outline display  " );
-    grWriteln( "h           toggle hinting              D           toggle dotnumber display" );
-    grWriteln( "f           toggle forced auto-                                             " );
-    grWriteln( "             hinting (if hinting)       if Multiple Master or GX font:      " );
-    grWriteln( "G           toggle grid display           F2        cycle through axes      " );
-    grWriteln( "C           change color palette          F3, F4    adjust current axis by  " );
-    grWriteln( "                                                     1/50th of its range    " );
-    grWriteln( "F5, F6      cycle through                                                   " );
-    grWriteln( "             anti-aliasing modes        P           print PNG file          " );
-    grWriteln( "L           cycle through LCD           q, ESC      quit ftgrid             " );
-    grWriteln( "             filters" );
+    grWriteln( "h           toggle hinting              d           toggle dot display      " );
+    grWriteln( "f           toggle forced auto-         D           toggle dotnumber display" );
+    grWriteln( "             hinting (if hinting)                                           " );
+    grWriteln( "G           toggle grid display         if Multiple Master or GX font:      " );
+    grWriteln( "C           change color palette          F2        cycle through axes      " );
+    grWriteln( "                                          F3, F4    adjust current axis by  " );
+    grWriteln( "F5, F6      cycle through                            1/50 of its range      " );
+    grWriteln( "             anti-aliasing modes                                            " );
+    grWriteln( "L           cycle through LCD           P           print PNG file          " );
+    grWriteln( "             filters                    q, ESC      quit ftgrid             " );
     grLn();
     grWriteln( "g, v        adjust gamma value" );
     /*          |----------------------------------|    |----------------------------------| */
@@ -1053,7 +1076,7 @@
 
     /* The floating scale is reversibly adjusted after decomposing it into */
     /* fraction and exponent. Direct bit manipulation is less portable.    */
-    frc = 8 * frexpf( status.scale, &exp );
+    frc = (int)( 8 * frexpf( status.scale, &exp ) );
 
     frc  = ( frc & 3 ) | ( exp << 2 );
     frc += step;
@@ -1268,9 +1291,9 @@
     if ( !err )
     {
       int  xmin = 0;
-      int  ymin = size->metrics.descender;
-      int  xmax = size->metrics.max_advance;
-      int  ymax = size->metrics.ascender;
+      int  ymin = size->metrics.y_ppem * -14;
+      int  xmax = size->metrics.x_ppem * 64;
+      int  ymax = size->metrics.y_ppem * 60;
 
       float  x_scale, y_scale;
 
@@ -1326,6 +1349,7 @@
       event.key = grKEY( *status.keys++ );
     else
     {
+      grRefreshSurface( display->surface );
       grListenSurface( display->surface, 0, &event );
 
       if ( event.type == gr_event_resize )
@@ -1368,6 +1392,14 @@
       FTDemo_Update_Current_Flags( handle );
       break;
 
+    case grKEY( 'b' ):
+      handle->use_sbits = !handle->use_sbits;
+      status.header    = handle->use_sbits ? "embedded bitmaps are now on"
+                                           : "embedded bitmaps are now off";
+
+      FTDemo_Update_Current_Flags( handle );
+      break;
+
 #ifdef FT_DEBUG_AUTOFIT
     case grKEY( '1' ):
       if ( handle->hinted                                  &&
@@ -1376,7 +1408,7 @@
              handle->lcd_mode == LCD_MODE_LIGHT_SUBPIXEL ) )
       {
         status.header = "dumping glyph edges to stdout";
-        af_glyph_hints_dump_edges( _af_debug_hints, 1 );
+        af_glyph_hints_dump_edges( af_debug_hints_, 1 );
       }
       break;
 
@@ -1387,7 +1419,7 @@
              handle->lcd_mode == LCD_MODE_LIGHT_SUBPIXEL ) )
       {
         status.header = "dumping glyph segments to stdout";
-        af_glyph_hints_dump_segments( _af_debug_hints, 1 );
+        af_glyph_hints_dump_segments( af_debug_hints_, 1 );
       }
       break;
 
@@ -1398,7 +1430,7 @@
              handle->lcd_mode == LCD_MODE_LIGHT_SUBPIXEL ) )
       {
         status.header = "dumping glyph points to stdout";
-        af_glyph_hints_dump_points( _af_debug_hints, 1 );
+        af_glyph_hints_dump_points( af_debug_hints_, 1 );
       }
       break;
 #endif /* FT_DEBUG_AUTOFIT */
@@ -1460,7 +1492,7 @@
       status.work ^= DO_OUTLINE;
       break;
 
-    case grKEY( 'b' ):
+    case grKEY( 'B' ):
       status.work ^= DO_BITMAP;
       if ( status.work & DO_BITMAP )
         status.work ^= DO_GRAY_BITMAP;
@@ -1512,7 +1544,7 @@
         status.header = "need autofit mode to toggle vertical hinting";
       break;
 
-    case grKEY( 'B' ):
+    case grKEY( 'Z' ):
       if ( handle->autohint                            ||
            handle->lcd_mode == LCD_MODE_LIGHT          ||
            handle->lcd_mode == LCD_MODE_LIGHT_SUBPIXEL )
@@ -1591,6 +1623,23 @@
       grWriteCellString( display->bitmap, 0, 3 * HEADER_HEIGHT,
                          status.header, display->fore_color );
 
+    if ( handle->current_font->num_indices )
+    {
+      int  x;
+
+
+      x = snprintf( status.header_buffer, BUFSIZE,
+                    handle->encoding == FT_ENCODING_ORDER   ? "%d/%d" :
+                    handle->encoding == FT_ENCODING_UNICODE ? "U+%04X/U+%04X" :
+                                                              "0x%X/0x%X",
+                    status.Num, handle->current_font->num_indices - 1 );
+
+      grWriteCellString( display->bitmap,
+                         display->bitmap->width - 8 * x,
+                         display->bitmap->rows - GR_FONT_SIZE,
+                         status.header_buffer, display->fore_color );
+    }
+
     if ( status.mm )
     {
       const char*  format = "%s axis: %.02f";
@@ -1606,13 +1655,11 @@
       grWriteCellString( display->bitmap, 0, 4 * HEADER_HEIGHT,
                          status.header, display->fore_color );
     }
-
-    grRefreshSurface( display->surface );
   }
 
 
   static void
-  usage( char*  execname )
+  usage( const char*  execname )
   {
     fprintf( stderr,
       "\n"
@@ -1620,7 +1667,7 @@
       "----------------------------------------------------------------\n"
       "\n" );
     fprintf( stderr,
-      "Usage: %s [options] pt font ...\n"
+      "Usage: %s [options] [pt] font ...\n"
       "\n",
              execname );
     fprintf( stderr,
@@ -1643,7 +1690,8 @@
       "  -f index  Specify first index to display (default: 0).\n"
       "  -e enc    Specify encoding tag (default: no encoding).\n"
       "            Common values: `unic' (Unicode), `symb' (symbol),\n"
-      "            `ADOB' (Adobe standard), `ADBC' (Adobe custom).\n"
+      "            `ADOB' (Adobe standard), `ADBC' (Adobe custom),\n"
+      "            or a numeric charmap index.\n"
       "  -a \"axis1 axis2 ...\"\n"
       "            Specify the design coordinates for each\n"
       "            Multiple Master axis at start-up.  Implies `-n'.\n"
@@ -1660,13 +1708,11 @@
   parse_cmdline( int*    argc,
                  char**  argv[] )
   {
-    char*  execname;
-    int    option;
-    int    have_encoding = 0;
-    int    have_index    = 0;
+    int          option;
+    int          have_encoding = 0;
+    int          have_index    = 0;
+    const char*  execname = ft_basename( (*argv)[0] );
 
-
-    execname = ft_basename( (*argv)[0] );
 
     while ( 1 )
     {
@@ -1707,8 +1753,7 @@
         break;
 
       case 'f':
-        status.Num = atoi( optarg );
-        have_index = 1;
+        have_index = sscanf( optarg, "%i", &status.Num );
         break;
 
       case 'k':
@@ -1749,18 +1794,20 @@
     *argc -= optind;
     *argv += optind;
 
-    if ( *argc <= 1 )
+    if ( *argc == 0 )
       usage( execname );
+
+    if ( *argc > 1                                                 &&
+         ( status.ptsize = (int)( atof( *argv[0] ) * 64.0 ) ) != 0 )
+    {
+      (*argc)--;
+      (*argv)++;
+    }
+    else
+      status.ptsize = 32 * 64 ;
 
     if ( have_encoding && !have_index )
       status.Num = 0x20;
-
-    status.ptsize = (int)( atof( *argv[0] ) * 64.0 );
-    if ( status.ptsize == 0 )
-      status.ptsize = 64 * 10;
-
-    (*argc)--;
-    (*argv)++;
   }
 
 
@@ -1773,6 +1820,7 @@
 
     /* initialize engine */
     handle = FTDemo_New();
+    handle->use_sbits = 0;
 
     grid_status_init( &status );
     circle_init( handle, 128 );
@@ -1792,12 +1840,11 @@
     if ( handle->num_fonts == 0 )
       Fatal( "could not find/open any font file" );
 
-    display = FTDemo_Display_New( status.device, status.dims );
+    display = FTDemo_Display_New( status.device, status.dims,
+                        "FreeType Glyph Grid Viewer - press ? for help" );
     if ( !display )
       Fatal( "could not allocate display surface" );
 
-    grSetTitle( display->surface,
-                "FreeType Glyph Grid Viewer - press ? for help" );
     FTDemo_Icon( handle, display );
 
     grid_status_display( &status, display );

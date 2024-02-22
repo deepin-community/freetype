@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality TrueType renderer.  */
 /*                                                                          */
-/*  Copyright (C) 1996-2021 by                                              */
+/*  Copyright (C) 1996-2023 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*                                                                          */
@@ -21,8 +21,8 @@
 #include <stdarg.h>
 #include <math.h>
 
-#include FT_LCD_FILTER_H
-#include FT_TRIGONOMETRY_H
+#include <freetype/ftlcdfil.h>
+#include <freetype/fttrigon.h>
 
 #define CELLSTRING_HEIGHT  8
 #define MAXPTSIZE          500   /* dtp */
@@ -30,6 +30,9 @@
 
   static const char*  Sample[] =
   {
+    /* Custom string if any */
+    NULL,
+
     "The quick brown fox jumps over the lazy dog",
 
     /* Luís argüia à Júlia que «brações, fé, chá, óxido, pôr, zângão» */
@@ -78,7 +81,8 @@
     RENDER_MODE_TEXT,
     RENDER_MODE_WATERFALL,
     RENDER_MODE_KERNCMP,
-    N_RENDER_MODES
+    N_RENDER_MODES,
+    RENDER_FLAG_TTY = 8
   };
 
   static struct  status_
@@ -214,7 +218,7 @@
 
     outline = &((FT_OutlineGlyph)*glyph)->outline;
 
-    FT_Outline_New( handle->library, points, contours, outline );
+    FT_Outline_New( handle->library, points, (FT_Int)contours, outline );
     outline->n_points = outline->n_contours = 0;
 
     FT_Stroker_Export( handle->stroker, outline );
@@ -255,8 +259,7 @@
 
     grWriteln( buf );
     grLn();
-    grWriteln( "This program is used to display a string of text using" );
-    grWriteln( "the new convenience API of the FreeType 2 library." );
+    grWriteln( "This program is used to display a text string." );
     grLn();
     grWriteln( "Use the following keys :" );
     grLn();
@@ -266,6 +269,7 @@
     grWriteln( "  f         : toggle forced auto-hinting" );
     grWriteln( "  h         : toggle outline hinting" );
     grWriteln( "  H         : change hinting engine" );
+    grWriteln( "  V         : toggle vertical rendering" );
     grLn();
     grWriteln( "  1-4       : select rendering mode" );
     grWriteln( "  l         : cycle through anti-aliasing modes" );
@@ -273,7 +277,7 @@
     grWriteln( "  t         : cycle through kerning degrees" );
     grWriteln( "  Space     : cycle through color" );
     grWriteln( "  Tab       : cycle through sample strings" );
-    grWriteln( "  V         : toggle vertical rendering" );
+    grWriteln( "  Enter     : toggle simple string editor" );
     grLn();
     grWriteln( "  g, v      : adjust gamma by 0.1" );
     grLn();
@@ -355,7 +359,7 @@
 
     status.sc.matrix = &status.trans_matrix;
 
-    radian  = status.angle * 3.14159265 / 180.0;
+    radian  = status.angle * ( 3.14159265 / 180.0 );
     cosinus = (FT_Fixed)( cos( radian ) * 65536.0 );
     sinus   = (FT_Fixed)( sin( radian ) * 65536.0 );
 
@@ -428,15 +432,14 @@
   static void
   event_text_change( void )
   {
-    static int  i = 0;
+    static int  i = INT_MAX - 1;
+
+
+    if ( ++i >= (int)( sizeof ( Sample ) / sizeof ( Sample[0] ) ) )
+      i = Sample[0] == NULL ? 1 : 0;
 
     status.text = Sample[i];
-
-    i++;
-    if ( i >= (int)( sizeof( Sample ) / sizeof( Sample[0] ) ) )
-      i = 0;
   }
-
 
   static void
   event_size_change( int  delta )
@@ -462,17 +465,36 @@
       if ( status.render_mode < 0 )
         status.render_mode += N_RENDER_MODES;
     }
+  }
 
-    switch ( status.render_mode )
+
+  static int
+  Process_TTY( grKey  key )
+  {
+    static char  buffer[32] = "Edit this text";
+    static int   cursor     = 14;
+
+
+    if ( key == grKeyReturn )
+      status.render_mode ^= RENDER_FLAG_TTY;
+    else if ( key == grKeyBackSpace )
     {
-    case RENDER_MODE_KERNCMP:
-      status.header = "Kerning comparison";
-      break;
-
-    default:
-      status.header = NULL;
-      break;
+      if ( cursor )
+        buffer[--cursor] = '\0';
     }
+    else if ( 31 < key && key < 127 )
+    {
+      if ( cursor < 31)
+        buffer[cursor++] = (char)key;
+    }
+    else if ( key != grKeyTab )
+      return 0;
+
+    snprintf( status.header_buffer, sizeof ( status.header_buffer ),
+              "TTY mode [%s%*c]", buffer, cursor - 32, '_' );
+
+    FTDemo_String_Set( handle, buffer );
+    return 1;
   }
 
 
@@ -488,11 +510,16 @@
       event.key = grKEY( *status.keys++ );
     else
     {
+      grRefreshSurface( display->surface );
       grListenSurface( display->surface, 0, &event );
 
       if ( event.type == gr_event_resize )
         return ret;
     }
+
+    if ( status.render_mode & RENDER_FLAG_TTY &&
+         Process_TTY( event.key ) )
+       goto String;
 
     if ( event.key >= '1' && event.key < '1' + N_RENDER_MODES )
     {
@@ -508,6 +535,10 @@
     case grKEY( 'q' ):
       ret = 1;
       goto Exit;
+
+    case grKeyReturn:
+      Process_TTY( event.key );
+      goto String;
 
     case grKeyF1:
     case grKEY( '?' ):
@@ -555,24 +586,10 @@
 
     case grKEY( 'k' ):
       sc->kerning_mode = ( sc->kerning_mode + 1 ) % N_KERNING_MODES;
-      status.header =
-        sc->kerning_mode == KERNING_MODE_SMART
-        ? "pair kerning and side bearing correction is now active"
-        : sc->kerning_mode == KERNING_MODE_NORMAL
-          ? "pair kerning is now active"
-          : "pair kerning is now ignored";
       goto String;
 
     case grKEY( 't' ):
       sc->kerning_degree = ( sc->kerning_degree + 1 ) % N_KERNING_DEGREES;
-      status.header =
-        sc->kerning_degree == KERNING_DEGREE_NONE
-        ? "no track kerning"
-        : sc->kerning_degree == KERNING_DEGREE_LIGHT
-          ? "light track kerning active"
-          : sc->kerning_degree == KERNING_DEGREE_MEDIUM
-            ? "medium track kerning active"
-            : "tight track kerning active";
       goto String;
 
     case grKeySpace:
@@ -642,19 +659,38 @@
   static void
   write_header( FT_Error  error_code )
   {
+    FTDemo_String_Context*  sc = &status.sc;
+
+    char  kern[40];
+    int   x;
+
+
     FTDemo_Draw_Header( handle, display, status.ptsize, status.res,
                         -1, error_code );
 
+    /* describe kerning */
+    x = sprintf( kern, "%s pairs, %s track",
+             sc->kerning_mode == KERNING_MODE_SMART  ? "adjusted" :
+             sc->kerning_mode == KERNING_MODE_NORMAL ? "" : "no",
+             sc->kerning_degree == KERNING_DEGREE_TIGHT  ? "tight" :
+             sc->kerning_degree == KERNING_DEGREE_MEDIUM ? "medium" :
+             sc->kerning_degree == KERNING_DEGREE_LIGHT  ? "light" : "no" );
+
+    grWriteCellString( display->bitmap,
+                       display->bitmap->width / 2 - 4 * x, 2 * HEADER_HEIGHT,
+                       kern, display->fore_color );
+
     if ( status.header )
+    {
       grWriteCellString( display->bitmap, 0, 3 * HEADER_HEIGHT,
                          status.header, display->fore_color );
-
-    grRefreshSurface( display->surface );
+      status.header = NULL;
+    }
   }
 
 
   static void
-  usage( char*  execname )
+  usage( const char*  execname )
   {
     fprintf( stderr,
       "\n"
@@ -662,7 +698,7 @@
       "-------------------------------------------------------\n"
       "\n" );
     fprintf( stderr,
-      "Usage: %s [options] pt font ...\n"
+      "Usage: %s [options] [pt] font ...\n"
       "\n",
              execname );
     fprintf( stderr,
@@ -684,7 +720,8 @@
       "  -r R      Use resolution R dpi (default: 72dpi).\n"
       "  -e enc    Specify encoding tag (default: Unicode).\n"
       "            Common values: `unic' (Unicode), `symb' (symbol),\n"
-      "            `ADOB' (Adobe standard), `ADBC' (Adobe custom).\n"
+      "            `ADOB' (Adobe standard), `ADBC' (Adobe custom),\n"
+      "            or a numeric charmap index.\n"
       "  -m text   Use `text' for rendering.\n"
       "\n"
       "  -v        Show version.\n"
@@ -698,11 +735,9 @@
   parse_cmdline( int*     argc,
                  char***  argv )
   {
-    char*  execname;
-    int    option;
+    int          option;
+    const char*  execname = ft_basename( (*argv)[0] );
 
-
-    execname = ft_basename( (*argv)[0] );
 
     while ( 1 )
     {
@@ -732,7 +767,7 @@
       case 'm':
         if ( *argc < 3 )
           usage( execname );
-        status.text = optarg;
+        Sample[0] = optarg;
         break;
 
       case 'r':
@@ -761,22 +796,48 @@
     *argc -= optind;
     *argv += optind;
 
-    if ( *argc <= 1 )
+    if ( *argc == 0 )
       usage( execname );
 
-    status.ptsize = (int)( atof( *argv[0] ) * 64.0 );
-    if ( status.ptsize == 0 )
-      status.ptsize = 64;
-
-    (*argc)--;
-    (*argv)++;
+    if ( *argc > 1                                                 &&
+         ( status.ptsize = (int)( atof( *argv[0] ) * 64.0 ) ) != 0 )
+    {
+      (*argc)--;
+      (*argv)++;
+    }
+    else
+      status.ptsize = 32 * 64 ;
   }
 
 
-  static FT_Error
+  static void
+  Render_TTY( void )
+  {
+    FT_Size  size;
+
+
+    /* check the sizing error */
+    error = FTDemo_Get_Size( handle, &size );
+    if ( error )
+      return;
+
+    FTDemo_String_Draw( handle, display,
+                        &status.sc,
+                        FT_MulFix( display->bitmap->width, status.sc.center),
+                        display->bitmap->rows / 2 );
+
+    /* this was prepared in Process_TTY */
+    status.header = status.header_buffer;
+
+    return;
+  }
+
+
+  static void
   Render_String( void )
   {
-    int x, y = display->bitmap->rows - 4;
+    int      x, y = display->bitmap->rows - 4;
+    FT_Size  size;
 
 
     x = 4;
@@ -788,16 +849,21 @@
     x = display->bitmap->width / 2;
     FTDemo_Draw_Glyph( handle, display, dinkus, &x, &y );
 
+    /* check the sizing error */
+    error = FTDemo_Get_Size( handle, &size );
+    if ( error )
+      return;
+
     FTDemo_String_Draw( handle, display,
                         &status.sc,
                         FT_MulFix( display->bitmap->width, status.sc.center),
                         display->bitmap->rows / 2 );
 
-    return FT_Err_Ok;
+    return;
   }
 
 
-  static FT_Error
+  static void
   Render_Text( void )
   {
     int      x = FT_MulFix( display->bitmap->width, status.sc.center);
@@ -813,7 +879,7 @@
 
     error = FTDemo_Get_Size( handle, &size );
     if ( error )
-      return error;
+      return;
 
     step_y = ( size->metrics.height >> 6 ) + 1;
     y      = 40 + ( size->metrics.ascender >> 6 );
@@ -828,11 +894,11 @@
       offset %= handle->string_length;
     }
 
-    return FT_Err_Ok;
+    return;
   }
 
 
-  static FT_Error
+  static void
   Render_Waterfall( void )
   {
     int      pt_size = status.ptsize, step, pt_height;
@@ -851,17 +917,17 @@
 
     while ( 1 )
     {
-      pt_size += step;
+      pt_size  += step;
+      pt_height = (int)handle->scaler.height;
 
       FTDemo_Set_Current_Charsize( handle, pt_size, status.res );
-      FTDemo_String_Load( handle, &status.sc );
+      /* avoid reloading repetitive sizes with bitmap fonts */
+      if ( (int)handle->scaler.height != pt_height )
+        FTDemo_String_Load( handle, &sc );
 
       error = FTDemo_Get_Size( handle, &size );
       if ( error )
-      {
-        /* probably a non-existent bitmap font size */
-        continue;
-      }
+        break;
 
       if ( pt_size == status.ptsize )
         grFillHLine( display->bitmap, x - 4, y, 8, display->warn_color );
@@ -878,14 +944,15 @@
                           x, y + ( size->metrics.descender >> 6 ) );
     }
 
+    /* restore the original size */
     FTDemo_Set_Current_Charsize( handle, status.ptsize, status.res );
     FTDemo_String_Load( handle, &status.sc );
 
-    return FT_Err_Ok;
+    return;
   }
 
 
-  static FT_Error
+  static void
   Render_KernCmp( void )
   {
     FT_Size                size;
@@ -896,7 +963,9 @@
 
     x = 55;
 
-    FTDemo_Get_Size( handle, &size );
+    error = FTDemo_Get_Size( handle, &size );
+    if ( error )
+      return;
     height = size->metrics.y_ppem;
     if ( height < CELLSTRING_HEIGHT )
       height = CELLSTRING_HEIGHT;
@@ -930,7 +999,7 @@
                        "both", display->fore_color );
     FTDemo_String_Draw( handle, display, &sc, x, y );
 
-    return FT_Err_Ok;
+    return;
   }
 
 
@@ -969,22 +1038,15 @@
     if ( handle->num_fonts == 0 )
       PanicZ( "could not open any font file" );
 
-    display = FTDemo_Display_New( status.device, status.dims );
-
+    display = FTDemo_Display_New( status.device, status.dims,
+                        "FreeType String Viewer - press ? for help" );
     if ( !display )
       PanicZ( "could not allocate display surface" );
 
-    grSetTitle( display->surface,
-                "FreeType String Viewer - press ? for help" );
     FTDemo_Icon( handle, display );
 
-    status.header = NULL;
-
-    if ( !status.text )
-      event_text_change();
-
     event_color_change();
-
+    event_text_change();
     event_font_change( 0 );
     FTDemo_String_Set( handle, status.text );
     FTDemo_Update_Current_Flags( handle );
@@ -997,25 +1059,28 @@
       switch ( status.render_mode )
       {
       case RENDER_MODE_STRING:
-        error = Render_String();
+        Render_String();
         break;
 
       case RENDER_MODE_TEXT:
-        error = Render_Text();
+        Render_Text();
         break;
 
       case RENDER_MODE_WATERFALL:
-        error = Render_Waterfall();
+        Render_Waterfall();
         break;
 
       case RENDER_MODE_KERNCMP:
-        error = Render_KernCmp();
+        Render_KernCmp();
+        break;
+
+      default:
+        Render_TTY();
         break;
       }
 
       write_header( error );
 
-      status.header = 0;
     } while ( !Process_Event() );
 
     printf( "Execution completed successfully.\n" );

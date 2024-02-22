@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality font engine         */
 /*                                                                          */
-/*  Copyright (C) 1996-2021 by                                              */
+/*  Copyright (C) 1996-2023 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*  ftlint: a simple font tester. This program tries to load all the        */
@@ -15,6 +15,7 @@
 
 #include <ft2build.h>
 #include <freetype/freetype.h>
+#include <freetype/ftoutln.h>
 #include <freetype/ftbitmap.h>
 
 
@@ -64,20 +65,76 @@
 
 
   static void
-  Usage( char*  name )
+  Usage( const char*  name )
   {
-    printf( "ftlint: simple font tester -- part of the FreeType project\n" );
-    printf( "----------------------------------------------------------\n" );
-    printf( "\n" );
-    printf( "Usage: %s [options] ppem fontname [fontname2..]\n",
-            name );
-    printf( "\n" );
-    printf( "  -f L    Use hex number L as load flags (see `FT_LOAD_XXX')\n" );
-    printf( "  -r N    Set render mode to N\n" );
-    printf( "  -i I-J  Range of glyph indices to use (default: all)\n" );
-    printf( "  -q      Quiet mode without the rendering analysis\n" );
+    fprintf( stderr,
+      "\n"
+      "ftlint: simple font tester -- part of the FreeType project\n"
+      "----------------------------------------------------------\n"
+      "\n"
+      "Usage: %s [options] ppem fontname [fontname2..]\n",
+             name );
+    fprintf( stderr,
+      "\n"
+      "  -f L    Use hex number L as load flags (see `FT_LOAD_XXX')\n"
+      "  -r N    Set render mode to N\n"
+      "  -i I-J  Range of glyph indices to use (default: all)\n"
+      "  -q      Quiet mode without the rendering analysis\n"
+      "\n" );
 
     exit( 1 );
+  }
+
+
+  static void
+  Examine( FT_GlyphSlot  slot )
+  {
+    unsigned long  format = slot->format;
+    FT_Outline*    outline = &slot->outline;
+    short          c, p, first, last;
+    FT_Vector      u, v;
+    FT_Pos         taxi;
+    FT_BBox        cbox;
+
+
+    if ( format != FT_GLYPH_FORMAT_OUTLINE )
+    {
+      putchar( ' ' );
+      putchar( ( format >> 24 ) & 0xFF );
+      putchar( ( format >> 16 ) & 0xFF );
+      putchar( ( format >>  8 ) & 0xFF );
+      putchar( ( format       ) & 0xFF );
+      putchar( ' ' );
+      return;
+    }
+
+    taxi = 0;
+    last = -1;
+    for ( c = 0; c < outline->n_contours; c++ )
+    {
+      first = last + 1;
+      last = outline->contours[c];
+
+      u = outline->points[last];
+      for ( p = first; p <= last; p++ )
+      {
+        v = outline->points[p];
+
+        taxi += v.x > u.x ? v.x - u.x : u.x - v.x;
+        taxi += v.y > u.y ? v.y - u.y : u.y - v.y;
+
+        u = v;
+      }
+    }
+
+    if ( taxi )
+    {
+      FT_Outline_Get_CBox( outline, &cbox );
+      printf( "%5.2f ", 0.5 * taxi /
+                        ( cbox.xMax - cbox.xMin + cbox.yMax - cbox.yMin ) );
+    }
+    else
+      printf( " void " );
   }
 
 
@@ -97,17 +154,22 @@
       for ( d0 = d1 = 0, j = 0; j < bitmap->width; j++, b++ )
       {
         d1 -= *b;
-        s2 += d1 >= d0 ? d1 - d0 : d0 - d1;  /* second derivative sum */
-        s1 += d1 >= 0 ? d1 : -d1;            /*  first derivative sum */
+        /* second derivative sum */
+        s2 += (unsigned long)( d1 >= d0 ? d1 - d0 : d0 - d1 );
+        /*  first derivative sum */
+        s1 += (unsigned long)( d1 >= 0 ? d1 : -d1 );
         d0  = d1;
         d1  = *b;
       }
-      s2 += d1 > d0 ? d1 - d0 : d0 - d1;
-      s2 += d1;
-      s1 += d1;
+      s2 += (unsigned long)( d1 > d0 ? d1 - d0 : d0 - d1 );
+      s2 += (unsigned long)d1;
+      s1 += (unsigned long)d1;
     }
 
-    printf( "%.4lf ", s1 ? (double)s2 / s1 : 2.0 );
+    if ( s1 )
+      printf( "%.4lf ", (double)s2 / s1 );
+    else
+      printf( "  void " );
 
     /* Y-acutance */
     for ( s1 = s2 = 0, j = 0; j < bitmap->width; j++ )
@@ -116,17 +178,22 @@
       for ( d0 = d1 = 0, i = 0; i < bitmap->rows; i++, b += bitmap->pitch )
       {
         d1 -= *b;
-        s2 += d1 >= d0 ? d1 - d0 : d0 - d1;  /* second derivative sum */
-        s1 += d1 >= 0 ? d1 : -d1;            /*  first derivative sum */
+        /* second derivative sum */
+        s2 += (unsigned long)( d1 >= d0 ? d1 - d0 : d0 - d1 );
+        /*  first derivative sum */
+        s1 += (unsigned long)( d1 >= 0 ? d1 : -d1 );
         d0  = d1;
         d1  = *b;
       }
-      s2 += d1 > d0 ? d1 - d0 : d0 - d1;
-      s2 += d1;
-      s1 += d1;
+      s2 += (unsigned long)( d1 > d0 ? d1 - d0 : d0 - d1 );
+      s2 += (unsigned long)d1;
+      s1 += (unsigned long)d1;
     }
 
-    printf( "%.4lf ", s1 ? (double)s2 / s1 : 2.0 );
+    if ( s1 )
+      printf( "%.4lf ", (double)s2 / s1 );
+    else
+      printf( "  void " );
   }
 
 
@@ -154,7 +221,7 @@
         char**  argv )
   {
     int           file_index, face_index;
-    char*         execname;
+    const char*   execname;
     char*         fname;
     int           opt;
     unsigned int  first_index = 0;
@@ -163,9 +230,6 @@
 
 
     execname = ft_basename( argv[0] );
-
-    if ( argc < 3 )
-      Usage( execname );
 
     while ( ( opt =  getopt( argc, argv, "f:r:i:q") ) != -1)
     {
@@ -219,8 +283,7 @@
     argc -= optind;
     argv += optind;
 
-
-    if( sscanf( argv[0], "%d", &ptsize) != 1 )
+    if ( argc < 2 || sscanf( argv[0], "%d", &ptsize) != 1 )
       Usage( execname );
 
     error = FT_Init_FreeType( &library );
@@ -244,19 +307,23 @@
       error = FT_New_Face( library, fname, face_index, &face );
       if ( error )
       {
-        Error( "  " );
+        Error( "  opening " );
         continue;
       }
 
-      printf( quiet ? "  %s %s:" : "  %s %s\n\n",
+      printf( quiet ? "  %s %s:" : "  %s %s\n",
               face->family_name, face->style_name );
 
       error = FT_Set_Char_Size( face, ptsize << 6, ptsize << 6, 72, 72 );
       if ( error )
       {
-        Error( "  " );
+        Error( "  sizing " );
         goto Finalize;
       }
+
+      /* nothing to do */
+      if ( !face->num_glyphs )
+        goto Finalize;
 
       fi = first_index > 0 ? first_index : 0;
       li = last_index < (unsigned int)face->num_glyphs ?
@@ -264,9 +331,9 @@
 
       if ( !quiet )
       {
-        /*      "NNNNN AAAxBBBB X.XXXX Y.YYYY MMDD55MMDD55MMDD55MMDD55MMDD55MM" */
-        printf( " GID  imgsize  Xacut  Yacut  MD5 hashsum\n" );
-        printf( "-------------------------------------------------------------\n" );
+        /*        "NNNNN SS.SS WWWxHHHH X.XXXX Y.YYYY MMDD55MMDD55MMDD55MMDD55MMDD55MM" */
+        printf( "\n GID  shape imgsize  Xacut  Yacut  MD5 hashsum" );
+        printf( "\n-------------------------------------------------------------------\n" );
       }
 
       Fail = 0;
@@ -292,8 +359,10 @@
 
         printf( "%5u ", id );
 
+        Examine( face->glyph );
+
         error = FT_Render_Glyph( face->glyph, render_mode );
-        if ( error && error != FT_Err_Cannot_Render_Glyph )
+        if ( error && face->glyph->format != FT_GLYPH_FORMAT_BITMAP )
         {
           Error( "rendering " );
           Fail++;

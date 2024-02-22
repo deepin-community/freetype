@@ -1,7 +1,7 @@
 Source: freetype
 Section: libs
 Priority: optional
-Maintainer: Hugh McMaster <hugh.mcmaster@outlook.com>
+Maintainer: Hugh McMaster <hmc@debian.org>
 Uploaders: Anthony Fok <foka@debian.org>, Keith Packard <keithp@keithp.com>
 Build-Depends:
  debhelper-compat (= 13),
@@ -9,16 +9,16 @@ Build-Depends:
  bzip2,
  gettext,
  libbrotli-dev,
- libjs-jquery,
+ libbz2-dev,
  libpng-dev,
  libtool,
- libx11-dev <!stage1>,
+ libx11-dev <!pkg.freetype.nodemos>,
  zlib1g-dev | libz-dev,
  pkg-config,
- x11proto-core-dev <!stage1>
-Standards-Version: 4.6.0
+ x11proto-core-dev <!pkg.freetype.nodemos>
+Standards-Version: 4.6.2
 Rules-Requires-Root: no
-Homepage: https://www.freetype.org
+Homepage: https://freetype.org
 Vcs-Git: https://salsa.debian.org/debian/freetype.git
 Vcs-Browser: https://salsa.debian.org/debian/freetype
 
@@ -63,6 +63,7 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends:
  libfreetype6 (= ${binary:Version}),
  libbrotli-dev,
+ libbz2-dev,
  libc6-dev | libc-dev,
  libpng-dev,
  zlib1g-dev | libz-dev,
@@ -70,6 +71,7 @@ Depends:
 Suggests: freetype2-doc (= ${binary:Version})
 Replaces: libfreetype6-dev (<< 2.10.1)
 Breaks: libfreetype6-dev (<< 2.10.1)
+Provides: libfreetype6-dev (= ${binary:Version})
 Description: FreeType 2 font engine, development files
  The FreeType project is a team of volunteers who develop free,
  portable and high-quality software solutions for digital typography.
@@ -79,27 +81,11 @@ Description: FreeType 2 font engine, development files
  This package contains all of the supplementary files you need to develop your
  own programs using the FreeType 2 library.
 
-Package: libfreetype6-dev
-Architecture: any
-Multi-Arch: same
-Depends: libfreetype-dev (= ${binary:Version}), ${misc:Depends}
-Section: oldlibs
-Description: FreeType 2 font engine, development files (transitional package)
- The FreeType project is a team of volunteers who develop free,
- portable and high-quality software solutions for digital typography.
- They specifically target embedded systems and focus on providing small,
- efficient and ubiquitous products.
- .
- This package contains all of the supplementary files you need to develop your
- own programs using the FreeType 2 library.
- .
- This is a transitional package. It can safely be removed.
-
 Package: freetype2-demos
 Section: utils
 Architecture: any
 Multi-Arch: foreign
-Build-Profiles: <!stage1>
+Build-Profiles: <!pkg.freetype.nodemos>
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: FreeType 2 demonstration programs
@@ -115,7 +101,7 @@ Package: freetype2-doc
 Section: doc
 Architecture: all
 Multi-Arch: foreign
-Depends: libjs-jquery, ${misc:Depends}
+Depends: ${misc:Depends}
 Recommends:
  fonts-dejavu-core,
  fonts-noto-core
@@ -133,6 +119,7 @@ Package: libfreetype6-udeb
 Section: debian-installer
 Architecture: any
 Package-Type: udeb
+Build-Profiles: <!noudeb>
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: FreeType 2 font engine for the debian-installer
  The FreeType project is a team of volunteers who develop free,

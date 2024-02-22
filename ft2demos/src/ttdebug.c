@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality TrueType renderer.  */
 /*                                                                          */
-/*  Copyright (C) 1996-2021 by                                              */
+/*  Copyright (C) 1996-2023 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*                                                                          */
@@ -52,13 +52,15 @@
 
 
 #include <ft2build.h>
-#include FT_FREETYPE_H
-#include FT_MULTIPLE_MASTERS_H
+#include <freetype/freetype.h>
+
+#include <freetype/ftdriver.h>
+#include <freetype/ftmm.h>
+
 #include "common.h"
 #include "strbuf.h"
 #include "mlgetopt.h"
 
-#include FT_DRIVER_H
 
   /* The following header shouldn't be used in normal programs.    */
   /* `freetype/src/truetype' must be in the current include path. */
@@ -83,7 +85,7 @@
   static FT_Fixed*     requested_pos;
   static unsigned int  requested_cnt;
 
-  static unsigned int  tt_interpreter_versions[3];
+  static unsigned int  tt_interpreter_versions[2];
   static int           num_tt_interpreter_versions;
   static unsigned int  dflt_tt_interpreter_version;
 
@@ -934,7 +936,7 @@
 
     /* 0x30 */
     "Interpolate untouched points between touched ones in the y direction.",
-    "Interpolate untouched points between toucned ones in the x direction.",
+    "Interpolate untouched points between touched ones in the x direction.",
     "Shift point P [FV] by distance (origin,current) [PV] of RP2 <L>:\n"
       "  p (%s) -",
     "Shift point P [FV] by distance (origin,current) [PV] of RP1 <L>:\n"
@@ -1547,7 +1549,7 @@
 
 
     switch( error )
-    #include FT_ERRORS_H
+    #include <freetype/fterrors.h>
 
     fprintf( stderr, "%s\n  error = 0x%04x, %s\n", message, error, str );
 
@@ -1976,8 +1978,10 @@
 
 
   static FT_Error
-  RunIns( TT_ExecContext  exc )
+  RunIns( void*  exec )
   {
+    TT_ExecContext  exc = (TT_ExecContext)exec;
+
     FT_Int  key;
 
     FT_Bool  really_leave;
@@ -2288,7 +2292,7 @@
           printf( "\n" );
           break;
 
-        /* Toggle between decimal and hexadimal integer format */
+        /* Toggle between decimal and hexadecimal integer format */
         case 'I':
           use_hex = !use_hex;
           printf( "Use %s format for displaying integers.\n",
@@ -2852,23 +2856,21 @@
 
 
   static void
-  Usage( char*  execname )
+  Usage( const char*  execname )
   {
     char  versions[32];
 
 
     /* we expect that at least one interpreter version is available */
-    if ( num_tt_interpreter_versions == 2 )
+    if ( num_tt_interpreter_versions == 1 )
+      snprintf( versions, sizeof ( versions ),
+                "%d",
+                tt_interpreter_versions[0] );
+    else
       snprintf( versions, sizeof ( versions ),
                 "%d and %d",
                 tt_interpreter_versions[0],
                 tt_interpreter_versions[1] );
-    else
-      snprintf( versions, sizeof ( versions ),
-                "%d, %d, and %d",
-                tt_interpreter_versions[0],
-                tt_interpreter_versions[1],
-                tt_interpreter_versions[2] );
 
     fprintf( stderr,
       "\n"
@@ -2909,13 +2911,12 @@
   main( int     argc,
         char**  argv )
   {
-    char*  execname;
     int    option;
     char   version_string[64];
 
     int           i;
-    unsigned int  versions[3] = { TT_INTERPRETER_VERSION_35,
-                                  TT_INTERPRETER_VERSION_38,
+    const char*   execname;
+    unsigned int  versions[2] = { TT_INTERPRETER_VERSION_35,
                                   TT_INTERPRETER_VERSION_40 };
     int           version;
     int           face_index = 0;
@@ -2953,7 +2954,7 @@
     FT_Property_Get( library,
                      "truetype",
                      "interpreter-version", &dflt_tt_interpreter_version );
-    for ( i = 0; i < 3; i++ )
+    for ( i = 0; i < 2; i++ )
     {
       error = FT_Property_Set( library,
                                "truetype",
@@ -3050,7 +3051,7 @@
 
     FT_Set_Debug_Hook( library,
                        FT_DEBUG_HOOK_TRUETYPE,
-                       (FT_DebugHook_Func)RunIns );
+                       RunIns );
 
     printf( "%s\n"
             "press key `h' or `?' for help\n"

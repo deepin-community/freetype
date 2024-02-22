@@ -4,7 +4,7 @@
  *
  *    basic type definitions
  *
- *  Copyright (C) 1999-2021 by
+ *  Copyright (C) 1999-2023 by
  *  The FreeType Development Team - www.freetype.org
  *
  *
@@ -17,13 +17,17 @@
 
 #if defined( __STDC_VERSION__ ) && __STDC_VERSION__ >= 199901L
 
+#if defined( __VMS ) && __CRTL_VER <= 80400000
+#include <inttypes.h>
+#else
 #include <stdint.h>
-
-#ifndef UINT32_MAX
-#error  "could not find a 32-bit integer type"
 #endif
 
-#else  /* old trick to determine 32-bit integer type */
+#endif
+
+/* If UINT32_MAX is not defined and uint32_t is not available, */
+/* we perform old trick to determine 32-bit integer type       */
+#ifndef UINT32_MAX
 
 #include <limits.h>
 
@@ -57,7 +61,7 @@
 #error  "could not find a 32-bit integer type"
 #endif
 
-#endif  /* old trick to determine 32-bit integer type */
+#endif  /* !UINT32_MAX */
 
 
   typedef unsigned char  byte;
@@ -82,9 +86,7 @@
 #define gr_err_bad_argument         -2
 #define gr_err_bad_target_depth     -3
 #define gr_err_bad_source_depth     -4
-#define gr_err_saturation_overflow  -5
-#define gr_err_conversion_overflow  -6
-#define gr_err_invalid_device       -7
+#define gr_err_invalid_device       -5
 
 
 #ifdef GR_MAKE_OPTION_SINGLE_OBJECT

@@ -11,7 +11,8 @@
   <meta http-equiv="Content-Script-Type"
         content="text/javascript">
   <meta name="description"
-        content="FreeType Documentation">
+        content="FreeType Documentation - Glyph Conventions -  Glyph
+                 Outlines">
   <meta name="Author"
         content="David Turner">
 
@@ -23,17 +24,12 @@
         type="text/css"
         href="../css/freetype2_-90.css">
 
-  <script type="text/javascript"
-          src="../../../js/jquery-1.11.0.min.js">
-  </script>
-  <script type="text/javascript"
-          src="../../../js/jquery.ba-resize.min.js">
   </script>
   <script type="text/javascript"
           src="../../../js/freetype2.js">
   </script>
 
-  <title>FreeType Glyph Conventions / II</title>
+  <title>FreeType Glyph Conventions | Glyph Outlines</title>
 </head>
 
 
@@ -86,7 +82,7 @@
           <p>As a consequence, the size of text is usually given in
             <em>points</em>, rather than device-specific pixels.
             Points are a <em>physical</em> unit, where 1&nbsp;point
-            equals 1/72th of an inch in digital typography.  As an
+            equals 1/72 of an inch in digital typography.  As an
             example, most books using the Latin script are printed
             with a body text size somewhere between 10 and
             14&nbsp;points.</p>
@@ -139,13 +135,13 @@
             -32768 to&nbsp;32767.  (Even though point coordinates can
             be floats in other formats such as Type&nbsp;1, we will
             restrict our analysis to integer values for
-            simplicity).</p>
+            simplicity.)</p>
 
           <p><em>The grid is always oriented like the traditional
               mathematical two-dimensional plane, i.e.,
               the <i>X</i>&nbsp;axis goes from the left to the right,
               and the <i>Y</i>&nbsp;axis from bottom to top.</em></p>
-        
+
           <p>In creating the glyph outlines, a type designer uses an
             imaginary square called the <em>EM square</em>.
             Typically, the EM square can be thought of as a tablet on
@@ -205,17 +201,15 @@
               fonts:</em></p>
 
           <p align="center">
-            <img src="body_comparison.png"
-                 height="40"
-                 width="580"
+            <img src="font-comparison.svg"
+                 height="80%"
+                 width="80%"
                  alt="Comparison of font heights">
           </p>
 
           <p>As one can see, the glyphs of the Courier family are
             smaller than those of Times New Roman, which themselves
-            are slightly smaller than those of Arial, even though
-            everything is displayed or printed at a size of
-            16&nbsp;points.  This only reflects design choices.</p>
+            are slightly smaller than those of Arial.</p>
 
 
           <h3 id="section-3">3. Hinting and Bitmap rendering</h3>
@@ -322,7 +316,7 @@
                     if the glyph programs are complex.</p>
 
                   <p><b>Size.</b>  Glyph programs can be long.</p>
-                
+
                   <p><b>Technical difficulty.</b>  It is extremely
                     difficult to write good hinting programs.  Very
                     few tools available.</p>
@@ -340,7 +334,7 @@
                   <p><b>Speed.</b>  Grid-fitting is usually a fast
                     process.</p>
                 </td>
-                
+
                 <td valign="top">
                   <p><b>Quality.</b>  Often questionable at small
                     sizes.  Better with anti-aliasing though.</p>
@@ -350,16 +344,16 @@
                     the same engine.</p>
                 </td>
               </tr>
-        
+
               <tr>
                 <td valign="top" align="center">
                   <p><b>automatic</b></p>
                 </td>
-                
+
                 <td valign="top">
                   <p><b>Size.</b>  No need for control information,
                     resulting in smaller font files.</p>
-                
+
                   <p><b>Speed.</b>  Depends on the grid-fitting
                     algorithm.  Usually faster than explicit
                     grid-fitting.</p>
@@ -371,7 +365,7 @@
 
                   <p><b>Speed.</b>  Depends on the grid-fitting
                     algorithm.</p>
-        
+
                   <p><b>Inconsistency.</b>  Results can vary between
                     different renderers, or even distinct versions
                     of the same engine.</p>
@@ -384,7 +378,7 @@
         <!-- ************************************************** -->
 
         <div class="updated">
-          <p>Last update: 13-Feb-2018</p>
+          <p>Last update: 23-Oct-2022</p>
         </div>
       </div>
     </div>

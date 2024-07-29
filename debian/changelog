@@ -1,3 +1,9 @@
+freetype (2.13.2+dfsg-1deepin1) unstable; urgency=medium
+
+  * Add patch to fix WPS error.
+
+ -- xiangzelong <xiangzelong@deepin.org>  Mon, 29 Jul 2024 11:10:11 +0800
+
 freetype (2.13.2+dfsg-1) unstable; urgency=medium
 
   * New upstream version 2.13.2:

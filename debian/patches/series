@@ -3,3 +3,4 @@ ftoption.patch
 no-web-fonts.patch
 hide-donations-information.patch
 0001-src-base-ftsynth.c-keep-compatiblity-in-FT_GlyphSlot.patch
+0006-Check-for-overflow-in-array-size-computation.patch

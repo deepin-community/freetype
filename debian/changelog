@@ -1,3 +1,10 @@
+freetype (2.13.2+dfsg-1deepin2) unstable; urgency=medium
+
+  * Fix integer overflow in tt_var_load_item_variation_store (CVE-2026-23865)
+    + debian/patches/0006-Check-for-overflow-in-array-size-computation.patch
+
+ -- Tianyu Chen <sweetyfish@deepin.org>  Fri, 17 Apr 2026 11:46:40 +0800
+
 freetype (2.13.2+dfsg-1deepin1) unstable; urgency=medium
 
   * Add patch to fix WPS error.

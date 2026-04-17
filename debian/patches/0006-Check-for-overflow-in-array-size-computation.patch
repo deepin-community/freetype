@@ -1,0 +1,36 @@
+From: Werner Lemberg <wl@gnu.org>
+Date: Sat, 3 Jan 2026 08:07:57 +0100
+Subject: Check for overflow in array size computation.
+
+Problem reported and analyzed by povcfe <povcfe2sec@gmail.com>.
+
+Fixes issue #1382.
+
+* src/truetype/ttgxvar.c (tt_var_load_item_variation_store): Do it.
+
+Use FT_QALLOC_MULT.
+
+* src/truetype/ttgxvar.c (tt_var_load_item_variation_store): Here.
+This call provides builtin overflow protection. See #1382.
+---
+ src/truetype/ttgxvar.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/src/truetype/ttgxvar.c b/src/truetype/ttgxvar.c
+index ad4f266..071dd83 100644
+--- a/src/truetype/ttgxvar.c
++++ b/src/truetype/ttgxvar.c
+@@ -682,11 +682,9 @@
+       if ( long_words )
+         per_region_size *= 2;
+ 
+-      if ( FT_NEW_ARRAY( varData->deltaSet, per_region_size * item_count ) )
++      if ( FT_QALLOC_MULT( varData->deltaSet, item_count, per_region_size ) )
+         goto Exit;
+-      if ( FT_Stream_Read( stream,
+-                           varData->deltaSet,
+-                           per_region_size * item_count ) )
++      if ( FT_STREAM_READ( varData->deltaSet, item_count * per_region_size ) )
+       {
+         FT_TRACE2(( "deltaSet read failed." ));
+         error = FT_THROW( Invalid_Table );

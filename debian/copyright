@@ -7,21 +7,21 @@ Comment: The files in this path have been removed because they are minified
          JavaScript files and are incompatible with the DFSG.
 
 Files: *
-Copyright: 1996-2023 David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 1996-2024 David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
 Files: vms_make.com
-Copyright: 1996-2023 David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 1996-2024 David Turner, Robert Wilhelm and Werner Lemberg
            2001, 2002 Francesco Zappa Nardelli
            2010-2019 Joel Klinghed
 License: FTL and Expat
 
 Files: builds/amiga/*
-Copyright: 2005-2023 Werner Lemberg and Detlef Würkner
+Copyright: 2005-2024 Werner Lemberg and Detlef Würkner
 License: FTL
 
 Files: builds/amiga/src/base/*
-Copyright: 1996-2023 David Turner, Robert Wilhelm, Werner Lemberg and Detlef Würkner
+Copyright: 1996-2024 David Turner, Robert Wilhelm, Werner Lemberg and Detlef Würkner
 License: FTL
 
 Files: builds/cmake/FindHarfBuzz.cmake
@@ -32,7 +32,7 @@ License: BSD-3-Clause
 Files: builds/mac/ftmac.c
        include/freetype/ftmac.h
        src/base/ftmac.c
-Copyright: 1996-2023 Just van Rossum, David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 1996-2024 Just van Rossum, David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
 Files: builds/unix/ax_compare_version.m4
@@ -59,7 +59,7 @@ License: GPL-2+
 
 Files: debian/*
 Copyright: 1996-2019 Christoph Lameter, Anthony Fok, Steve Langasek, et al.
-           2018-2023 Hugh McMaster
+           2018-2024 Hugh McMaster
 License: GPL-2+
 
 Files: docs/DOCGUIDE
@@ -67,12 +67,12 @@ Files: docs/DOCGUIDE
        src/sfnt/sfwoff2.h
        src/sfnt/woff2tags.c
        src/sfnt/woff2tags.h
-Copyright: 2018-2023 Nikhil Ramakrishnan, David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 2018-2024 Nikhil Ramakrishnan, David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
 Files: docs/INSTALL.CROSS
        ft2demos/mac/ftoldmac.c
-Copyright: 1996-2023 Suzuki Toshiya, David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 1996-2024 Suzuki Toshiya, David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
 Files: docs/reference/*
@@ -80,14 +80,22 @@ Copyright: The FreeType Project
 License: FTL
 
 Files: ft2demos/graph/beos/grbeos.cpp
-Copyright: 2001-2023 Michael Pfeiffer
+Copyright: 2001-2024 Michael Pfeiffer
+License: FTL
+
+Files: ft2demos/graph/gblender.h
+       include/freetype/internal/services/svttglyf.h
+       src/base/ftpatent.c
+       src/lzw/ftzopen.c
+       src/lzw/ftzopen.h
+Copyright: 2002-2024 David Turner
 License: FTL
 
 Files: ft2demos/graph/graph.h
        ft2demos/graph/grdevice.h
        ft2demos/graph/grobjs.h
        ft2demos/graph/grtypes.h
-Copyright: 1999-2023 The FreeType Development Team
+Copyright: 1999-2024 The FreeType Development Team
 License: FTL
 
 Files: ft2demos/graph/grswizzle.c
@@ -96,7 +104,7 @@ License: Public-Domain
          "this filtering code is explicitly placed in the public domain !!"
 
 Files: ft2demos/graph/mac/grmac.c
-Copyright: 1999-2023 Just van Rossum, Antoine Leca,
+Copyright: 1999-2024 Just van Rossum, Antoine Leca,
                      David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
@@ -104,15 +112,15 @@ Files: ft2demos/graph/win32/grwin32.c
        ft2demos/graph/win32/grwin32.h
        ft2demos/graph/x11/grx11.c
        ft2demos/graph/x11/grx11.h
-Copyright: 1999-2023 Antoine Leca, David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 1999-2024 Antoine Leca, David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
 Files: ft2demos/mac/getargv.c
-Copyright: 1991-2023 Stichting Mathematisch Centrum
+Copyright: 1991-2024 Stichting Mathematisch Centrum
 License: MIT-SMC
 
 Files: ft2demos/meson_options.txt
-Copyright: 2022-2023 David Turner, Robert Wilhelm, Werner Lemberg and Charlie Jiang
+Copyright: 2022-2024 David Turner, Robert Wilhelm, Werner Lemberg and Charlie Jiang
 License: FTL
 
 Files: ft2demos/src/ftinspect/ftinspect.cpp
@@ -133,7 +141,7 @@ Files: ft2demos/src/ftinspect/ftinspect.cpp
        ft2demos/src/ftinspect/widgets/customwidgets.cpp
        ft2demos/src/ftinspect/widgets/customwidgets.hpp
        src/tools/update-copyright-year
-Copyright: 2015-2023 Werner Lemberg
+Copyright: 2015-2024 Werner Lemberg
 License: FTL
 
 Files: ft2demos/src/ftinspect/engine/charmap.cpp
@@ -184,11 +192,11 @@ Files: ft2demos/src/ftinspect/engine/charmap.cpp
        ft2demos/src/ftinspect/widgets/glyphindexselector.hpp
        ft2demos/src/ftinspect/widgets/tripletselector.cpp
        ft2demos/src/ftinspect/widgets/tripletselector.hpp
-Copyright: 2022-2023 Charlie Jiang
+Copyright: 2022-2024 Charlie Jiang
 License: FTL
 
 Files: ft2demos/src/ftsdf.c
-Copyright: 2021-2023 David Turner, Robert Wilhelm, Werner Lemberg and Anuj Verma
+Copyright: 2021-2024 David Turner, Robert Wilhelm, Werner Lemberg and Anuj Verma
 License: FTL
 
 Files: ft2demos/src/md5.c
@@ -203,11 +211,6 @@ Copyright: None
 License: Public-Domain
          "This code is hereby expressly placed in the public domain."
 
-Files: ft2demos/src/rsvg-port.c
-       ft2demos/src/rsvg-port.h
-Copyright: 2022-2023 David Turner, Robert Wilhelm, Werner Lemberg and Moazin Khatti
-License: FTL
-
 Files: ft2docs/docs/tutorial/example2.cpp
        ft2docs/docs/tutorial/example3.cpp
        ft2docs/docs/tutorial/example4.cpp
@@ -221,20 +224,20 @@ License: Expat
 
 Files: include/freetype/ftbzip2.h
        src/bzip2/*
-Copyright: 2010-2023 Joel Klinghed
+Copyright: 2010-2024 Joel Klinghed
 License: FTL
 
 Files: include/freetype/ftcid.h
        include/freetype/internal/services/svcid.h
        src/base/ftcid.c
-Copyright: 2007-2023 Derek Clegg and Michael Toftdal
+Copyright: 2007-2024 Derek Clegg and Michael Toftdal
 License: FTL
 
 Files: include/freetype/ftgxval.h
        include/freetype/internal/services/svgxval.h
        include/freetype/internal/services/svttcmap.h
        src/base/ftgxval.c
-Copyright: 2003-2023 Masatake Yamato, Red Hat K.K.,
+Copyright: 2003-2024 Masatake Yamato, Red Hat K.K.,
                      David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
@@ -246,16 +249,18 @@ License: Expat
 
 
 Files: include/freetype/internal/ftmmtypes.h
-Copyright: 2022-2023 David Turner, Robert Wilhelm, Werner Lemberg,
+Copyright: 2022-2024 David Turner, Robert Wilhelm, Werner Lemberg,
                      George Williams and Dominik Röttsches
 License: FTL
 
 Files: include/freetype/internal/ftrfork.h
        src/base/ftrfork.c
-Copyright: 2004-2023 Masatake Yamato and Redhat K.K.
+Copyright: 2004-2024 Masatake Yamato and Redhat K.K.
 License: FTL
 
-Files: include/freetype/internal/svginterface.h
+Files: ft2demos/src/rsvg-port.c
+       ft2demos/src/rsvg-port.h
+       include/freetype/internal/svginterface.h
        include/freetype/otsvg.h
        src/sfnt/ttsvg.c
        src/sfnt/ttsvg.h
@@ -265,24 +270,12 @@ Files: include/freetype/internal/svginterface.h
        src/svg/rules.mk
        src/svg/svg.c
        src/svg/svgtypes.h
-Copyright: 2022-2023 David Turner, Robert Wilhelm, Werner Lemberg and Moazin Khatti
+Copyright: 2022-2024 David Turner, Robert Wilhelm, Werner Lemberg and Moazin Khatti
 License: FTL
 
 Files: include/freetype/internal/services/svmm.h
        src/cff/cffdrivr.c
-Copyright: 1996-2023 David Turner, Robert Wilhelm, Werner Lemberg and Dominik Röttsches
-License: FTL
-
-Files: src/sfnt/ttcmapc.h
-Copyright: 2009-2023 Oran Agra and Mickey Gabel
-License: FTL
-
-Files: ft2demos/graph/gblender.h
-       include/freetype/internal/services/svttglyf.h
-       src/base/ftpatent.c
-       src/lzw/ftzopen.c
-       src/lzw/ftzopen.h
-Copyright: 2002-2023 David Turner
+Copyright: 1996-2024 David Turner, Robert Wilhelm, Werner Lemberg and Dominik Röttsches
 License: FTL
 
 Files: include/dlg/*
@@ -292,7 +285,7 @@ License: BSL-1.0
 
 Files: src/autofit/afindic.c
        src/autofit/afindic.h
-Copyright: 2007-2023 Rahul Bhalerao
+Copyright: 2007-2024 Rahul Bhalerao
 License: FTL
 
 Files: src/autofit/ft-hb.c
@@ -302,11 +295,11 @@ Copyright: 2009, 2023 Red Hat, Inc.
 License: MIT-Modern-Variant
 
 Files: src/base/ftbase.h
-Copyright: 2008-2023 David Turner, Robert Wilhelm, Werner Lemberg and Suzuki Toshiya
+Copyright: 2008-2024 David Turner, Robert Wilhelm, Werner Lemberg and Suzuki Toshiya
 License: FTL
 
 Files: src/base/fterrors.c
-Copyright: 2018-2023 Armin Hasitzka, David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 2018-2024 Armin Hasitzka, David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
 Files: src/base/md5.c
@@ -342,12 +335,12 @@ Copyright: 2000 Computing Research Labs, New Mexico State University
 License: Expat
 
 Files: src/gxvalid/*
-Copyright: 2004-2023 Suzuki Toshiya, Masatake Yamato, Red Hat K.K.,
+Copyright: 2004-2024 Suzuki Toshiya, Masatake Yamato, Red Hat K.K.,
                      David Turner, Robert Wilhelm and Werner Lemberg
 License: FTL
 
 Files: src/gxvalid/gxvfgen.c
-Copyright: 2004-2023 Masatake Yamato and Redhat K.K.
+Copyright: 2004-2024 Masatake Yamato and Redhat K.K.
 License: FTL
 
 Files: src/gzip/adler32.c
@@ -359,13 +352,13 @@ Files: src/gzip/adler32.c
        src/gzip/inflate.h
        src/gzip/inftrees.c
        src/gzip/inftrees.h
-Copyright: 1995-2022 Mark Adler
+Copyright: 1995-2023 Mark Adler
 License: Zlib
 
 Files: src/gzip/ftzconf.h
        src/gzip/zlib.h
        src/gzip/zutil.h
-Copyright: 1995-2022 Jean-loup Gailly and Mark Adler
+Copyright: 1995-2023 Jean-loup Gailly and Mark Adler
 License: Zlib
 
 Files: src/gzip/zutil.c
@@ -374,7 +367,7 @@ License: Zlib
 
 Files: src/lzw/ftlzw.c
        src/lzw/rules.mk
-Copyright: 2004-2023 Albert Chin-A-Young
+Copyright: 2004-2024 Albert Chin-A-Young
 License: FTL
 
 Files: src/pcf/pcfutil.c
@@ -407,15 +400,24 @@ License: FTL
 
 Files: src/sfnt/pngshim.c
        src/sfnt/pngshim.h
-Copyright: 2013-2023 Google, Inc.
+Copyright: 2013-2024 Google, Inc.
+License: FTL
+
+Files: src/sfnt/ttcmapc.h
+Copyright: 2009-2024 Oran Agra and Mickey Gabel
 License: FTL
 
 Files: src/sfnt/ttcolr.c
-Copyright: 2018-2023 David Turner, Robert Wilhelm, Dominik Röttsches and Werner Lemberg
+Copyright: 2018-2024 David Turner, Robert Wilhelm, Dominik Röttsches and Werner Lemberg
+License: FTL
+
+Files: src/sfnt/ttgpos.c
+       src/sfnt/ttgpos.h
+Copyright: 2024 David Saltzman
 License: FTL
 
 Files: src/sfnt/ttsbit.c
-Copyright: 2005-2023 David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 2005-2024 David Turner, Robert Wilhelm and Werner Lemberg
            2013 Google, Inc.
 License: FTL
 
@@ -435,7 +437,7 @@ License: Expat
 
 Files: src/truetype/ttgxvar.c
        src/truetype/ttgxvar.h
-Copyright: 2004-2023 David Turner, Robert Wilhelm, Werner Lemberg and George Williams
+Copyright: 2004-2024 David Turner, Robert Wilhelm, Werner Lemberg and George Williams
 License: FTL
 
 Files: src/type42/t42drivr.c
@@ -445,17 +447,17 @@ Files: src/type42/t42drivr.c
        src/type42/t42parse.c
        src/type42/t42parse.h
        src/type42/t42types.h
-Copyright: 2002-2023 Roberto Alameda
+Copyright: 2002-2024 Roberto Alameda
 License: FTL
 
 Files: src/winfonts/winfnt.c
-Copyright: 1996-2023 David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 1996-2024 David Turner, Robert Wilhelm and Werner Lemberg
            2003 Huw D M Davies for Codeweavers
            2007 Dmitry Timoshkov for Codeweavers
 License: FTL
 
 Files: src/winfonts/winfnt.h
-Copyright: 1996-2023 David Turner, Robert Wilhelm and Werner Lemberg
+Copyright: 1996-2024 David Turner, Robert Wilhelm and Werner Lemberg
            2007 Dmitry Timoshkov for Codeweavers
 License: FTL
 

@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality TrueType renderer.  */
 /*                                                                          */
-/*  Copyright (C) 1996-2023 by                                              */
+/*  Copyright (C) 1996-2024 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*  gblblit.c: Alpha blending with gamma correction and caching.            */
@@ -475,7 +475,7 @@ grBlitGlyphToSurface( grSurface*  surface,
 
 
   /* check arguments */
-  if ( !surface || !glyph )
+  if ( !surface || !glyph || !glyph->buffer )
   {
     grError = gr_err_bad_argument;
     return -1;

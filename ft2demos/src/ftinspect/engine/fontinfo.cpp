@@ -1,6 +1,6 @@
 // fontinfo.cpp
 
-// Copyright (C) 2022-2023 by
+// Copyright (C) 2022-2024 by
 // Charlie Jiang.
 
 #include "engine.hpp"
@@ -202,9 +202,7 @@ FontBasicInfo::get(Engine* engine)
   if (face->style_name)
     result.styleName = QString(face->style_name);
 
-  auto psName = FT_Get_Postscript_Name(face);
-  if (psName)
-    result.postscriptName = QString(psName);
+  result.postscriptName = engine->currentPostScriptNameWithoutCoords();
 
   auto head = static_cast<TT_Header*>(FT_Get_Sfnt_Table(face, FT_SFNT_HEAD));
   if (head)

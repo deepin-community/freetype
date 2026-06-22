@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality TrueType renderer.  */
 /*                                                                          */
-/*  Copyright (C) 1996-2023 by                                              */
+/*  Copyright (C) 1996-2024 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*                                                                          */
@@ -130,7 +130,7 @@
     FT_Outline*  outline;
     FT_Vector*   vec;
     FT_Vector*   limit;
-    char*        tag;
+    FT_Byte*     tag;
     FT_Fixed     s = FT_Sin( FT_ANGLE_PI4 / i );
     FT_Pos       b, d, p = 0, q = radius;
 
@@ -183,7 +183,7 @@
   {
     FT_Outline   path;
     FT_Vector*   vec;
-    char*        tag;
+    FT_Byte*     tag;
     FT_Outline*  outline;
     FT_UInt      points, contours;
 

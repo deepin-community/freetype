@@ -1,15 +1,23 @@
-freetype (2.13.2+dfsg-1deepin2) unstable; urgency=medium
+freetype (2.13.3+dfsg-1+deb13u1) trixie-security; urgency=medium
 
-  * Fix integer overflow in tt_var_load_item_variation_store (CVE-2026-23865)
-    + debian/patches/0006-Check-for-overflow-in-array-size-computation.patch
+  * CVE-2026-23865 (Closes: #1129606)
 
- -- Tianyu Chen <sweetyfish@deepin.org>  Fri, 17 Apr 2026 11:46:40 +0800
+ -- Moritz Mühlenhoff <jmm@debian.org>  Tue, 17 Mar 2026 21:21:54 +0100
 
-freetype (2.13.2+dfsg-1deepin1) unstable; urgency=medium
+freetype (2.13.3+dfsg-1) unstable; urgency=medium
 
-  * Add patch to fix WPS error.
+  * New upstream version 2.13.3.
+  * debian/control:
+    + Build-Depend on pkgconf instead of pkg-config.
+    + Sort the Build-Depends list.
+    + Raise Standards-Version to 4.7.0 from 4.6.2 (no changes needed).
+  * debian/copyright: Update for FreeType 2.13.3 and 2024.
+  * debian/patches:
+    + ftoption.patch: Refresh due to upstream changes.
+    + hide-donations-information.patch: Update description.
+  * debian/tests/control: Depend on pkgconf instead of pkg-config.
 
- -- xiangzelong <xiangzelong@deepin.org>  Mon, 29 Jul 2024 11:10:11 +0800
+ -- Hugh McMaster <hmc@debian.org>  Thu, 05 Sep 2024 22:09:27 +1000
 
 freetype (2.13.2+dfsg-1) unstable; urgency=medium
 

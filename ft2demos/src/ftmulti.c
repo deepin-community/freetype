@@ -2,7 +2,7 @@
 /*                                                                          */
 /*  The FreeType project -- a free and portable quality TrueType renderer.  */
 /*                                                                          */
-/*  Copyright (C) 1996-2023 by                                              */
+/*  Copyright (C) 1996-2024 by                                              */
 /*  D. Turner, R.Wilhelm, and W. Lemberg                                    */
 /*                                                                          */
 /*                                                                          */
@@ -1262,7 +1262,7 @@
     grDoneSurface( surface );
     grDoneDevices();
 
-    free            ( multimaster );
+    FT_Done_MM_Var  ( library, multimaster );
     FT_Done_Face    ( face        );
     FT_Done_FreeType( library     );
 

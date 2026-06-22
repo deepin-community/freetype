@@ -2,7 +2,7 @@
 # Meson project file for FreeType 2 test programs
 #
 
-# Copyright (C) 2021-2023 by
+# Copyright (C) 2021-2024 by
 # David Turner, Robert Wilhelm, and Werner Lemberg.
 #
 # This file is part of the FreeType project, and may only be used, modified,
@@ -17,7 +17,7 @@
 # possible since the subproject might not be cloned yet, so we have to
 # hard-code the string.
 project('freetype-demos', 'c', 'cpp',
-  version: '2.13.2')
+  version: '2.13.3')
 
 
 # Access to the FreeType 2 source tree is required, since some of the demo

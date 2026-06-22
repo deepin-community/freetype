@@ -1,10 +1,9 @@
 Description: Use a button for donations instead of an image
- of the documentation. Commenting out the relevant <li> tag prevents lintian
- from raising several privacy-breach-donation errors.
+ of the documentation.
 Author: Paul Wise
 Bug-Debian: https://bugs.debian.org/873432
 Forwarded: not-needed
-Last-Update: 2023-07-07
+Last-Update: 2024-09-05
 
 --- a/ft2docs/docs/design/design-1.html
 +++ b/ft2docs/docs/design/design-1.html

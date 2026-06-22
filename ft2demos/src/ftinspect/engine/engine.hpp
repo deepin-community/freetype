@@ -1,6 +1,6 @@
 // engine.hpp
 
-// Copyright (C) 2016-2023 by
+// Copyright (C) 2016-2024 by
 // Werner Lemberg.
 
 
@@ -76,6 +76,7 @@ public:
 
   //////// Actions
 
+  void loadFontWithFTCId(FTC_FaceID ftcId);
   int loadFont(int fontIndex,
                long faceIndex,
                int namedInstanceIndex); // Return number of glyphs.
@@ -128,6 +129,14 @@ public:
   int currentFontType() const { return fontType_; }
   const QString& currentFamilyName() { return curFamilyName_; }
   const QString& currentStyleName() { return curStyleName_; }
+  const QString& currentPostScriptNameWithoutCoords()
+  {
+    return curPostScriptNameWithoutCoords_;
+  }
+  const QString& currentPostScriptNameWithCoords()
+  {
+    return curPostScriptNameWithCoords_;
+  }
   int currentFontNumberOfGlyphs() { return curNumGlyphs_; }
 
   std::vector<PaletteInfo>& currentFontPalettes() { return curPaletteInfos_; }
@@ -234,6 +243,8 @@ private:
   int fontType_ = FontType_Other;
   QString curFamilyName_;
   QString curStyleName_;
+  QString curPostScriptNameWithoutCoords_;
+  QString curPostScriptNameWithCoords_;
   int curNumGlyphs_ = -1;
   std::vector<CharMapInfo> curCharMaps_;
   std::vector<PaletteInfo> curPaletteInfos_;
@@ -291,6 +302,7 @@ private:
   void switchNamedInstance(int index);
 
   // It is safe to put the implementation into the corresponding cpp file.
+  // Note: no rendering / writing should be done in the callback
   template <class Func>
   void withFace(FaceID id,
                 Func func);

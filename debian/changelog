@@ -1,3 +1,10 @@
+freetype (2.13.3+dfsg-1+deb13u1deepin1) unstable; urgency=medium
+
+  * Port 0001-src-base-ftsynth.c-keep-compatiblity-in-FT_GlyphSlot.patch
+    from master branch
+
+ -- lichenggang <lichenggang@uniontech.com>  Tue, 23 Jun 2026 21:23:47 +0800
+
 freetype (2.13.3+dfsg-1+deb13u1) trixie-security; urgency=medium
 
   * CVE-2026-23865 (Closes: #1129606)

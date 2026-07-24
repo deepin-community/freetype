@@ -1,3 +1,9 @@
+freetype (2.13.3+dfsg-1+deb13u1deepin2) unstable; urgency=medium
+
+  * fix(cve): CVE-2026-50811
+
+ -- deepin-ci-robot <packages@deepin.org>  Sat, 25 Jul 2026 02:05:19 +0800
+
 freetype (2.13.3+dfsg-1+deb13u1deepin1) unstable; urgency=medium
 
   * Port 0001-src-base-ftsynth.c-keep-compatiblity-in-FT_GlyphSlot.patch

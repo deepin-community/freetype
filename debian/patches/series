@@ -4,3 +4,4 @@ no-web-fonts.patch
 hide-donations-information.patch
 CVE-2026-23865.patch
 0001-src-base-ftsynth.c-keep-compatiblity-in-FT_GlyphSlot.patch
+CVE-2026-50811.patch

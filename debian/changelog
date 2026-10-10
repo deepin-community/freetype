@@ -1,3 +1,12 @@
+freetype (2.13.3+dfsg-1+deb13u1deepin4) unstable; urgency=medium
+
+  * fix(cve): CVE-2026-95512 (unknown) - [PATCH] * src/cid/cidload.c
+    (cid_read_subrs): Limit overlaps.   Upstream:
+    https://gitlab.freedesktop.org/freetype/freetype/-
+    /commit/f3ca71c9900fe860849b3163a6e2c1e765b291d9
+
+ -- deepin-ci-robot <packages@deepin.org>  Sat, 10 Oct 2026 16:55:00 +0800
+
 freetype (2.13.3+dfsg-1+deb13u1deepin3) unstable; urgency=medium
 
   * Rebuild with LTO enabled (dpkg vendor feature optimize/lto).
